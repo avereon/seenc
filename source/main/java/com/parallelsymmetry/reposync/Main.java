@@ -1,9 +1,6 @@
 package com.parallelsymmetry.reposync;
 
 import org.apache.commons.cli.*;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +22,11 @@ public class Main {
 	private static final Logger log = LoggerFactory.getLogger( com.parallelsymmetry.reposync.Main.class );
 
 	public static final void main( String[] commands ) {
-		new Main().run( commands );
+		try {
+			new Main().run( commands );
+		} catch( Exception exception ) {
+			log.error( "Error running Reposync", exception );
+		}
 	}
 
 	public void run( String[] commands ) {
@@ -73,23 +74,14 @@ public class Main {
 			log.info( (exists ? "  o " : "  + ") + message );
 			try {
 				if( exists ) {
-					doGitPull( config, localPath );
+					client.doGitPull( localPath );
 				} else {
-					doGitClone( config, localPath, repo.getRemote() );
+					client.doGitClone( localPath, repo.getRemote() );
 				}
 			} catch( Exception exception ) {
 				log.error( "  -- Error processing " + repo, exception );
 			}
 		}
-	}
-
-	private void doGitPull( BitbucketConfig config, Path repo ) throws IOException, GitAPIException {
-		Git.open( repo.toFile() ).pull().setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
-	}
-
-	private void doGitClone( BitbucketConfig config, Path repo, String uri ) throws IOException, GitAPIException {
-		Files.createDirectories( repo );
-		Git.cloneRepository().setURI( uri ).setDirectory( repo.toFile() ).setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
 	}
 
 	protected Options getOptions() {
@@ -143,8 +135,10 @@ public class Main {
 				String key = keyObject.toString();
 				properties.put( key, configProperties.getProperty( key ) );
 			}
+		} catch( FileNotFoundException exception ) {
+			throw new RuntimeException( "Missing config file: " + config, exception );
 		} catch( IOException exception ) {
-			log.error( "Unable to load properties from config file: " + config, exception );
+			log.error( "Unable to load config file: " + config, exception );
 		}
 	}
 

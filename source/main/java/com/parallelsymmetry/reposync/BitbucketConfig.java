@@ -2,7 +2,7 @@ package com.parallelsymmetry.reposync;
 
 import java.util.List;
 
-public class BitBucketConfig {
+public class BitbucketConfig {
 
 	private String protocol;
 
@@ -18,7 +18,7 @@ public class BitBucketConfig {
 
 	private String target;
 
-	public BitBucketConfig() {}
+	public BitbucketConfig() {}
 
 	public void setProjects( List<String> projects ) {
 		this.projects = projects;
@@ -74,8 +74,8 @@ public class BitBucketConfig {
 
 	public boolean equals( Object o ) {
 		if( o == this ) return true;
-		if( !(o instanceof BitBucketConfig) ) return false;
-		final BitBucketConfig other = (BitBucketConfig)o;
+		if( !(o instanceof BitbucketConfig) ) return false;
+		final BitbucketConfig other = (BitbucketConfig)o;
 		if( !other.canEqual( (Object)this ) ) return false;
 		final Object this$username = this.getUsername();
 		final Object other$username = other.getUsername();
@@ -107,10 +107,10 @@ public class BitBucketConfig {
 	}
 
 	protected boolean canEqual( Object other ) {
-		return other instanceof BitBucketConfig;
+		return other instanceof BitbucketConfig;
 	}
 
 	public String toString() {
-		return "BitBucketConfig(" + "protocol=" + this.getProtocol() + ", team=" + this.getTeam() + ", username=" + this.getUsername() + ", projectRepos=" + this.getRepoUri() + ", projectDir=" + this.getTarget() + ")";
+		return "BitbucketConfig(" + "protocol=" + this.getProtocol() + ", team=" + this.getTeam() + ", username=" + this.getUsername() + ", projectRepos=" + this.getRepoUri() + ", projectDir=" + this.getTarget() + ")";
 	}
 }

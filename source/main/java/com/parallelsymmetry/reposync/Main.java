@@ -1,26 +1,19 @@
 package com.parallelsymmetry.reposync;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.cli.*;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.client.support.BasicAuthorizationInterceptor;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriTemplate;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * The main class for Reposync.
@@ -30,10 +23,6 @@ public class Main {
 	public static final String CONFIG_DEFAULT = "/config.default";
 
 	private static final Logger log = LoggerFactory.getLogger( com.parallelsymmetry.reposync.Main.class );
-
-	private BitBucketConfig config;
-
-	private RestTemplate rest;
 
 	public static final void main( String[] commands ) {
 		new Main().run( commands );
@@ -65,86 +54,42 @@ public class Main {
 		loadPropertiesFromConfig( cli.getOptionValue( "config" ), properties );
 		// Load properties from command line
 		loadPropertiesFromCli( cli, properties );
-		config = configure( properties );
 
-		// Set up REST template
-		rest = new RestTemplate();
-		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.getUsername(), config.getPassword() ) );
-
-		processProjects();
+		processRepositories( configure( properties ) );
 	}
 
-	private void processProjects() {
+	private void processRepositories( BitbucketConfig config ) {
+		BitbucketClient client = new BitbucketClient( config );
+
 		log.info( "Requesting repositories for " + config.getTeam() + "..." );
-		JsonNode repos = getProjectRepos( config.getTeam() );
 
-		for( JsonNode repo : repos ) {
-			String repoName = repo.get( "name" ).asText().toLowerCase();
-			String projectName = repo.get( "project" ).get( "name" ).asText().toLowerCase();
+		Set<GitRepo> repos = client.getBitbucketRepos();
+		log.info( "Repository count: " + repos.size() );
 
-			UriTemplate targetUri = new UriTemplate( config.getTarget() );
-			Path targetPath = Paths.get( targetUri.expand( projectName, repoName ) );
-
-			boolean exists = Files.exists( targetPath );
-
+		for( GitRepo repo : repos ) {
+			Path localPath = repo.getLocalPath();
+			String message = repo + ": " + localPath.toAbsolutePath();
+			boolean exists = Files.exists( localPath );
+			log.info( (exists ? "  o " : "  + ") + message );
 			try {
 				if( exists ) {
-					// Update
-					int result = doGitPull( targetPath );
-					if( result == 0 ) {
-						log.info( "o " + projectName + "/" + repoName + ": " + targetPath.toAbsolutePath() );
-					} else {
-						log.warn( "! " + projectName + "/" + repoName + ": " + targetPath.toAbsolutePath() );
-					}
+					doGitPull( config, localPath );
 				} else {
-					// Clone
-					int result = doGitClone( targetPath, getCloneUri( repo ) );
-					if( result == 0 ) {
-						log.info( "+ " + projectName + "/" + repoName + ": " + targetPath.toAbsolutePath() );
-					} else {
-						log.warn( "! " + projectName + "/" + repoName + ": " + targetPath.toAbsolutePath() );
-					}
+					doGitClone( config, localPath, repo.getRemote() );
 				}
 			} catch( Exception exception ) {
-				log.error("Unable to process " + projectName + "/" + repoName, exception );
+				log.error( "  -- Error processing " + repo, exception );
 			}
 		}
 	}
 
-	private int doGitPull( Path repo ) throws IOException, GitAPIException {
-		try {
-			Git.open( repo.toFile() ).pull().setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
-			return 0;
-		} catch( CheckoutConflictException cce ) {
-			return -1;
-		}
+	private void doGitPull( BitbucketConfig config, Path repo ) throws IOException, GitAPIException {
+		Git.open( repo.toFile() ).pull().setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
 	}
 
-	private int doGitClone( Path repo, String uri ) throws IOException, GitAPIException {
+	private void doGitClone( BitbucketConfig config, Path repo, String uri ) throws IOException, GitAPIException {
 		Files.createDirectories( repo );
 		Git.cloneRepository().setURI( uri ).setDirectory( repo.toFile() ).setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
-		return 0;
-	}
-
-	private JsonNode getProjectRepos( String username ) {
-		try {
-			UriTemplate repoUri = new UriTemplate( config.getRepoUri() );
-			ObjectNode node = rest.getForObject( repoUri.expand( username ), ObjectNode.class );
-			return node.get( "values" );
-		} catch( Exception exception ) {
-			log.error( "Unable to retrieve project repository list", exception );
-			return JsonNodeFactory.instance.objectNode();
-		}
-	}
-
-	private String getCloneUri( JsonNode repo ) {
-		String protocol = config.getProtocol().toLowerCase();
-		for( JsonNode clone : repo.get( "links" ).get( "clone" ) ) {
-			if( clone.get( "name" ).asText().toLowerCase().equals( protocol ) ) {
-				return clone.get( "href" ).asText();
-			}
-		}
-		return null;
 	}
 
 	protected Options getOptions() {
@@ -170,7 +115,7 @@ public class Main {
 		try( InputStream input = getClass().getResourceAsStream( CONFIG_DEFAULT ) ) {
 			resourceProperties.load( input );
 		} catch( IOException exception ) {
-			log.error("Unable to load properties from resource: " + CONFIG_DEFAULT, exception );
+			log.error( "Unable to load properties from resource: " + CONFIG_DEFAULT, exception );
 		}
 		for( Object keyObject : resourceProperties.keySet() ) {
 			String key = keyObject.toString();
@@ -188,8 +133,8 @@ public class Main {
 	private void loadPropertiesFromConfig( String config, Map<String, String> properties ) {
 		if( config == null ) return;
 
-//		File file = new File( config );
-//		if( !file.isAbsolute() ) file = new File( System.getProperty( "user.dir"), config );
+		//		File file = new File( config );
+		//		if( !file.isAbsolute() ) file = new File( System.getProperty( "user.dir"), config );
 
 		try( FileInputStream input = new FileInputStream( new File( config ) ) ) {
 			Properties configProperties = new Properties();
@@ -199,12 +144,12 @@ public class Main {
 				properties.put( key, configProperties.getProperty( key ) );
 			}
 		} catch( IOException exception ) {
-			log.error("Unable to load properties from config file: " + config, exception );
+			log.error( "Unable to load properties from config file: " + config, exception );
 		}
 	}
 
-	private BitBucketConfig configure( Map<String, String> properties ) {
-		BitBucketConfig config = new BitBucketConfig();
+	private BitbucketConfig configure( Map<String, String> properties ) {
+		BitbucketConfig config = new BitbucketConfig();
 
 		config.setUsername( properties.get( "bitbucket-username" ) );
 		config.setPassword( properties.get( "bitbucket-password" ) );

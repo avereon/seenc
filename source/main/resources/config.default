@@ -1,2 +1,2 @@
 bitbucket-git-protocol=HTTPS
-bitbucket-rest-repo-uri=https://api.bitbucket.org/2.0/repositories/{username}?role=member&limit=999
+bitbucket-rest-repo-uri=https://api.bitbucket.org/2.0/repositories/{username}

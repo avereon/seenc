@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public class Main {
 
-	public static final String CONFIG_DEFAULT = "/config.default";
+	public static final String CONFIG_DEFAULT = "/default.properties";
 
 	private static final Logger log = LoggerFactory.getLogger( com.parallelsymmetry.reposync.Main.class );
 

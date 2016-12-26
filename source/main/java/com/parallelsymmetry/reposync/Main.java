@@ -71,13 +71,17 @@ public class Main {
 			Path localPath = repo.getLocalPath();
 			String message = repo + ": " + localPath.toAbsolutePath();
 			boolean exists = Files.exists( localPath );
-			log.info( (exists ? "  o " : "  + ") + message );
 			try {
+				GitResult result;
 				if( exists ) {
-					client.doGitPull( localPath );
+					int opResult = client.doGitPull( localPath );
+					result = opResult == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATES;
 				} else {
 					client.doGitClone( localPath, repo.getRemote() );
+					result = GitResult.CLONE_SUCCESS;
 				}
+
+				log.info( "  " + result.getSymbol() + " " + message );
 			} catch( Exception exception ) {
 				log.error( "  -- Error processing " + repo, exception );
 			}

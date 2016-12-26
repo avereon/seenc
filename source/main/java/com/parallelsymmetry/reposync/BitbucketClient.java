@@ -111,7 +111,7 @@ public class BitbucketClient {
 	public int doGitPull( Path repo ) throws IOException, GitAPIException {
 		PullResult result = Git.open( repo.toFile() ).pull().setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
 		MergeResult.MergeStatus status = result.getMergeResult().getMergeStatus();
-		return status == MergeResult.MergeStatus.ALREADY_UP_TO_DATE  ? 0 : 1;
+		return status == MergeResult.MergeStatus.ALREADY_UP_TO_DATE ? 0 : 1;
 	}
 
 	public int doGitClone( Path repo, String uri ) throws IOException, GitAPIException {
@@ -119,6 +119,5 @@ public class BitbucketClient {
 		Git.cloneRepository().setURI( uri ).setDirectory( repo.toFile() ).setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
 		return 0;
 	}
-
 
 }

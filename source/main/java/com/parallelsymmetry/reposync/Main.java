@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The main class for Reposync.
@@ -67,7 +64,10 @@ public class Main {
 		Set<GitRepo> repos = client.getBitbucketRepos();
 		log.info( "Repository count: " + repos.size() );
 
-		for( GitRepo repo : repos ) {
+		List<GitRepo> sortedRepos = new ArrayList<>( repos );
+		Collections.sort( sortedRepos );
+
+		for( GitRepo repo : sortedRepos ) {
 			Path localPath = repo.getLocalPath();
 			String message = repo + ": " + localPath.toAbsolutePath();
 			boolean exists = Files.exists( localPath );
@@ -81,9 +81,9 @@ public class Main {
 					result = GitResult.CLONE_SUCCESS;
 				}
 
-				log.info( "  " + result.getSymbol() + " " + message );
+				log.info( result.getSymbol() + " " + message );
 			} catch( Exception exception ) {
-				log.error( "  -- Error processing " + repo, exception );
+				log.error( "X " + message, exception );
 			}
 		}
 	}

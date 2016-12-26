@@ -5,7 +5,7 @@ import java.nio.file.Path;
 /**
  * The GitRepo class represents a Git repository.
  */
-public class GitRepo {
+public class GitRepo implements Comparable<GitRepo> {
 
 	private String project;
 
@@ -50,6 +50,11 @@ public class GitRepo {
 	@Override
 	public String toString() {
 		return getProject() + "/" + getName();
+	}
+
+	@Override
+	public int compareTo( GitRepo that ) {
+		return this.toString().compareTo( that.toString() );
 	}
 
 }

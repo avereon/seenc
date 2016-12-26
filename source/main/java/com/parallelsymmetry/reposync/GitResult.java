@@ -2,7 +2,7 @@ package com.parallelsymmetry.reposync;
 
 public enum GitResult {
 
-	FAILURE( 'X' ), CLONE_SUCCESS( '+' ), PULL_UP_TO_DATE( '=' ), PULL_UPDATES( 'o' );
+	FAILURE( 'X' ), CLONE_SUCCESS( '+' ), PULL_UPDATES( 'o' ), PULL_UP_TO_DATE( '=' );
 
 	private char symbol;
 

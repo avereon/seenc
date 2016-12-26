@@ -3,6 +3,7 @@ package com.parallelsymmetry.reposync;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -109,8 +110,8 @@ public class BitbucketClient {
 
 	public int doGitPull( Path repo ) throws IOException, GitAPIException {
 		PullResult result = Git.open( repo.toFile() ).pull().setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
-		int commits = result.getMergeResult().getMergedCommits().length;
-		return commits == 0 ? 0 : 1;
+		MergeResult.MergeStatus status = result.getMergeResult().getMergeStatus();
+		return status == MergeResult.MergeStatus.ALREADY_UP_TO_DATE  ? 0 : 1;
 	}
 
 	public int doGitClone( Path repo, String uri ) throws IOException, GitAPIException {

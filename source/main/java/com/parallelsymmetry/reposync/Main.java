@@ -74,8 +74,7 @@ public class Main {
 			try {
 				GitResult result;
 				if( exists ) {
-					int opResult = client.doGitPull( localPath );
-					result = opResult == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATES;
+					result = client.doGitPull( localPath ) == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATES;
 				} else {
 					client.doGitClone( localPath, repo.getRemote() );
 					result = GitResult.CLONE_SUCCESS;

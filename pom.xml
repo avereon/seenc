@@ -97,11 +97,11 @@
 	<distributionManagement>
 		<repository>
 			<id>psm-release</id>
-			<url>http://code.parallelsymmetry.com/repo/psm-release/</url>
+			<url>https://code.parallelsymmetry.com/repo/psm-release/</url>
 		</repository>
 		<snapshotRepository>
 			<id>psm-snapshot</id>
-			<url>http://code.parallelsymmetry.com/repo/psm-snapshot/</url>
+			<url>https://code.parallelsymmetry.com/repo/psm-snapshot/</url>
 		</snapshotRepository>
 	</distributionManagement>
 

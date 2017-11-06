@@ -1,4 +1,4 @@
-package com.parallelsymmetry.reposync;
+package com.xeomar.nomos;
 
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -10,13 +10,13 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * The main class for Reposync.
+ * The main class for Nomos.
  */
 public class Main {
 
 	public static final String CONFIG_DEFAULT = "/default.properties";
 
-	private static final Logger log = LoggerFactory.getLogger( com.parallelsymmetry.reposync.Main.class );
+	private static final Logger log = LoggerFactory.getLogger( Main.class );
 
 	public static final void main( String[] commands ) {
 		try {

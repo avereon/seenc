@@ -1,4 +1,4 @@
-package com.parallelsymmetry.reposync;
+package com.xeomar.nomos;
 
 import java.nio.file.Path;
 

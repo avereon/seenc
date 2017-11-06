@@ -1,4 +1,4 @@
-package com.parallelsymmetry.reposync;
+package com.xeomar.nomos;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -27,7 +27,7 @@ import java.util.Set;
  */
 public class BitbucketClient {
 
-	private static final Logger log = LoggerFactory.getLogger( com.parallelsymmetry.reposync.BitbucketClient.class );
+	private static final Logger log = LoggerFactory.getLogger( BitbucketClient.class );
 
 	private BitbucketConfig config;
 

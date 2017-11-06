@@ -2,16 +2,16 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.parallelsymmetry</groupId>
-	<artifactId>reposync</artifactId>
+	<groupId>com.xeomar</groupId>
+	<artifactId>nomos</artifactId>
 	<version>1.1</version>
 
-	<name>reposync</name>
+	<name>nomos</name>
 
 	<repositories>
 		<repository>
 			<id>xeo</id>
-			<url>https://code.xeomar.com/repo/psm</url>
+			<url>https://code.xeomar.com/repo/xeo</url>
 		</repository>
 	</repositories>
 
@@ -65,7 +65,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>com.parallelsymmetry.reposync.Main</mainClass>
+							<mainClass>com.xeomar.nomos.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -103,12 +103,12 @@
 
 	<distributionManagement>
 		<repository>
-			<id>psm-release</id>
-			<url>https://code.xeomar.com/repo/psm-release/</url>
+			<id>xeo-release</id>
+			<url>https://code.xeomar.com/repo/xeo-release/</url>
 		</repository>
 		<snapshotRepository>
-			<id>psm-snapshot</id>
-			<url>https://code.xeomar.com/repo/psm-snapshot/</url>
+			<id>xeo-snapshot</id>
+			<url>https://code.xeomar.com/repo/xeo-snapshot/</url>
 		</snapshotRepository>
 	</distributionManagement>
 

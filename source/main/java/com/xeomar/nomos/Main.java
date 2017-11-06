@@ -18,7 +18,15 @@ public class Main {
 
 	private static final Logger log = LoggerFactory.getLogger( Main.class );
 
-	public static final void main( String[] commands ) {
+	private String provider;
+
+	private String product;
+
+	private String version;
+
+	private int inceptionYear;
+
+	public static void main( String[] commands ) {
 		try {
 			new Main().run( commands );
 		} catch( Exception exception ) {
@@ -27,6 +35,8 @@ public class Main {
 	}
 
 	public void run( String[] commands ) {
+		describe();
+
 		// Print the program header
 		printHeader();
 
@@ -161,15 +171,29 @@ public class Main {
 		return config;
 	}
 
+	private void describe() {
+		try {
+			InputStream input = getClass().getResourceAsStream( "/product.properties" );
+			Properties properties = new Properties();
+			properties.load( new InputStreamReader( input, "utf-8" ) );
+			provider = properties.getProperty( "provider" );
+			product = properties.getProperty( "product" );
+			version = properties.getProperty( "version" );
+			inceptionYear = Integer.parseInt( properties.getProperty( "year" ) );
+		} catch( Exception exception ) {
+			log.error( "Error loading product description", exception );
+		}
+	}
+
 	private void printHeader() {
-		System.out.println( "Parallel Symmetry Reposync 1.0" );
-		System.out.println( "Copyright 2016 Parallel Symmetry" );
+		System.out.println( provider + " " + product + " " + version );
+		System.out.println( "Copyright " + inceptionYear + " " + provider );
 	}
 
 	private void printHelp() {
 		StringWriter writer = new StringWriter();
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( new PrintWriter( writer ), formatter.getWidth(), "reposync [OPTION]...", (String)null, getOptions(), formatter.getLeftPadding(), formatter.getDescPadding(), (String)null, false );
+		formatter.printHelp( new PrintWriter( writer ), formatter.getWidth(), "nomos [OPTION]...", (String)null, getOptions(), formatter.getLeftPadding(), formatter.getDescPadding(), (String)null, false );
 
 		System.out.println( "" );
 		System.out.println( writer.toString() );

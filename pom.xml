@@ -8,6 +8,13 @@
 
 	<name>reposync</name>
 
+	<repositories>
+		<repository>
+			<id>xeo</id>
+			<url>https://code.xeomar.com/repo/psm</url>
+		</repository>
+	</repositories>
+
 	<properties>
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -97,11 +104,11 @@
 	<distributionManagement>
 		<repository>
 			<id>psm-release</id>
-			<url>https://code.parallelsymmetry.com/repo/psm-release/</url>
+			<url>https://code.xeomar.com/repo/psm-release/</url>
 		</repository>
 		<snapshotRepository>
 			<id>psm-snapshot</id>
-			<url>https://code.parallelsymmetry.com/repo/psm-snapshot/</url>
+			<url>https://code.xeomar.com/repo/psm-snapshot/</url>
 		</snapshotRepository>
 	</distributionManagement>
 

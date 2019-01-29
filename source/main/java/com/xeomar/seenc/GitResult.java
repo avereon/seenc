@@ -1,4 +1,4 @@
-package com.xeomar.nomos;
+package com.xeomar.seenc;
 
 public enum GitResult {
 

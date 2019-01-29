@@ -1,4 +1,4 @@
-package com.xeomar.nomos;
+package com.xeomar.seenc;
 
 import java.util.List;
 

@@ -3,10 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.xeomar</groupId>
-	<artifactId>nomos</artifactId>
+	<artifactId>seenc</artifactId>
 	<version>1.1</version>
 
-	<name>Nomos</name>
+	<name>Seenc</name>
 	<description>A Bitbucket repository synchronization tool</description>
 	<inceptionYear>2017</inceptionYear>
 
@@ -113,7 +113,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>com.xeomar.nomos.Main</mainClass>
+							<mainClass>com.xeomar.seenc.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

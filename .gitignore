@@ -1,2 +1,3 @@
-nomos.iml
+*.iml
 target/
+.idea/

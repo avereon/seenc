@@ -1,4 +1,4 @@
-package com.xeomar.nomos;
+package com.xeomar.seenc;
 
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -193,7 +193,7 @@ public class Main {
 	private void printHelp() {
 		StringWriter writer = new StringWriter();
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( new PrintWriter( writer ), formatter.getWidth(), "nomos [OPTION]...", (String)null, getOptions(), formatter.getLeftPadding(), formatter.getDescPadding(), (String)null, false );
+		formatter.printHelp( new PrintWriter( writer ), formatter.getWidth(), "seenc [OPTION]...", (String)null, getOptions(), formatter.getLeftPadding(), formatter.getDescPadding(), (String)null, false );
 
 		System.out.println( "" );
 		System.out.println( writer.toString() );

@@ -24,12 +24,12 @@
 	<repositories>
 		<repository>
 			<id>xeo</id>
-			<url>https://code.xeomar.com/repo/xeo</url>
+			<url>https://repo.xeomar.com/xeo</url>
 		</repository>
 	</repositories>
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -126,16 +126,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<distributionManagement>
-		<repository>
-			<id>xeo-release</id>
-			<url>https://code.xeomar.com/repo/xeo-release/</url>
-		</repository>
-		<snapshotRepository>
-			<id>xeo-snapshot</id>
-			<url>https://code.xeomar.com/repo/xeo-snapshot/</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 </project>

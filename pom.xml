@@ -4,13 +4,13 @@
 
 	<parent>
 		<groupId>com.xeomar.pom</groupId>
-		<artifactId>jar</artifactId>
+		<artifactId>prd</artifactId>
 		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.xeomar</groupId>
 	<artifactId>seenc</artifactId>
-	<version>1.1</version>
+	<version>1.2</version>
 
 	<name>Seenc</name>
 	<description>A Bitbucket repository synchronization tool</description>
@@ -27,11 +27,6 @@
 			<url>https://repo.xeomar.com/xeo</url>
 		</repository>
 	</repositories>
-
-	<properties>
-		<java.version>8</java.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -62,67 +57,31 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>source/main/java</sourceDirectory>
-		<outputDirectory>target/main/java</outputDirectory>
-		<testSourceDirectory>source/test/java</testSourceDirectory>
-		<testOutputDirectory>target/test/java</testOutputDirectory>
-
-		<resources>
-			<resource>
-				<directory>source/main/resources</directory>
-				<filtering>false</filtering>
-				<excludes>
-					<exclude>**/*.properties</exclude>
-					<exclude>**/*.yaml</exclude>
-				</excludes>
-			</resource>
-			<resource>
-				<directory>source/main/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>**/*.properties</include>
-					<include>**/*.yaml</include>
-				</includes>
-			</resource>
-		</resources>
-
-		<testResources>
-			<testResource>
-				<directory>source/test/resources</directory>
-			</testResource>
-		</testResources>
-
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.6.0</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
-			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>3.0.0</version>
 				<executions>
 					<execution>
-						<id>single</id>
+						<id>assembly-product</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<configuration>
+							<finalName>product</finalName>
+							<attach>false</attach>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>com.xeomar.seenc.Main</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>com.xeomar.seenc.Main</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

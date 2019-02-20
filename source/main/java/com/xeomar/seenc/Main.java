@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * The main class for Nomos.
+ * The main class.
  */
 public class Main {
 
@@ -101,15 +101,13 @@ public class Main {
 		Options options = new Options();
 		options.addOption( Option.builder( "c" ).longOpt( "config" ).numberOfArgs( 1 ).argName( "file" ).build() );
 
-		options.addOption( Option.builder().longOpt( "projects" ).numberOfArgs( 1 ).argName( "project list" ).build() );
+		//options.addOption( Option.builder().longOpt( "projects" ).numberOfArgs( 1 ).argName( "project list" ).build() );
 		options.addOption( Option.builder().longOpt( "target" ).numberOfArgs( 1 ).argName( "folder" ).build() );
 
 		options.addOption( Option.builder().longOpt( "bitbucket-username" ).numberOfArgs( 1 ).argName( "username" ).build() );
 		options.addOption( Option.builder().longOpt( "bitbucket-password" ).numberOfArgs( 1 ).argName( "password" ).build() );
 		options.addOption( Option.builder().longOpt( "bitbucket-team" ).numberOfArgs( 1 ).argName( "team" ).build() );
-
 		options.addOption( Option.builder().longOpt( "bitbucket-rest-repo-uri" ).numberOfArgs( 1 ).argName( "uri" ).build() );
-
 		options.addOption( Option.builder().longOpt( "bitbucket-git-protocol" ).numberOfArgs( 1 ).argName( "protocol" ).build() );
 
 		return options;
@@ -158,14 +156,11 @@ public class Main {
 	private BitbucketConfig configure( Map<String, String> properties ) {
 		BitbucketConfig config = new BitbucketConfig();
 
+		config.setProtocol( properties.get( "bitbucket-git-protocol" ) );
+		config.setRepoUri( properties.get( "bitbucket-rest-repo-uri" ) );
+		config.setTeam( properties.get( "bitbucket-team" ) );
 		config.setUsername( properties.get( "bitbucket-username" ) );
 		config.setPassword( properties.get( "bitbucket-password" ) );
-		config.setTeam( properties.get( "bitbucket-team" ) );
-
-		config.setRepoUri( properties.get( "bitbucket-rest-repo-uri" ) );
-
-		config.setProtocol( properties.get( "bitbucket-git-protocol" ) );
-
 		config.setTarget( properties.get( "target" ) );
 
 		return config;
@@ -173,7 +168,7 @@ public class Main {
 
 	private void describe() {
 		try {
-			InputStream input = getClass().getResourceAsStream( "/product.properties" );
+			InputStream input = getClass().getResourceAsStream( "/META-INF/product.info" );
 			Properties properties = new Properties();
 			properties.load( new InputStreamReader( input, "utf-8" ) );
 			provider = properties.getProperty( "provider" );
@@ -191,11 +186,21 @@ public class Main {
 	}
 
 	private void printHelp() {
+		StringBuilder examples = new StringBuilder();
+		examples.append("\n");
+		examples.append("Repos: fab, mvs, psm, sbc, sod, xeo\n");
+		examples.append("\n");
+		examples.append("Config file example contents:\n");
+		examples.append("  target=file:/home/ecco/Data/xeo/code/{project}/{repo}\n");
+		examples.append("  bitbucket-team=xeomar\n");
+		examples.append("  bitbucket-username=<username>\n");
+		examples.append("  bitbucket-password=<password>\n");
+
 		StringWriter writer = new StringWriter();
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( new PrintWriter( writer ), formatter.getWidth(), "seenc [OPTION]...", (String)null, getOptions(), formatter.getLeftPadding(), formatter.getDescPadding(), (String)null, false );
+		formatter.printHelp( new PrintWriter( writer ), formatter.getWidth(), "seenc [OPTION]... <repo>", null, getOptions(), formatter.getLeftPadding(), formatter.getDescPadding(), examples.toString(), false );
 
-		System.out.println( "" );
+		System.out.println();
 		System.out.println( writer.toString() );
 	}
 

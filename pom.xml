@@ -10,7 +10,7 @@
 
 	<groupId>com.xeomar</groupId>
 	<artifactId>seenc</artifactId>
-	<version>1.2</version>
+	<version>1.2.1</version>
 
 	<name>Seenc</name>
 	<description>A Bitbucket repository synchronization tool</description>

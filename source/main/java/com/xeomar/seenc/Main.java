@@ -64,11 +64,11 @@ public class Main {
 	}
 
 	private void processRepositories( BitbucketConfig config ) {
-		BitbucketClient client = new BitbucketClient( config );
+		RepoClient client = RepoClientFactory.getRepoClient( config );
 
 		log.info( "Requesting repositories for " + config.getTeam() + "..." );
 
-		Set<GitRepo> repos = client.getBitbucketRepos();
+		Set<GitRepo> repos = client.getRepos();
 		log.info( "Repository count: " + repos.size() );
 
 		List<GitRepo> sortedRepos = new ArrayList<>( repos );
@@ -161,7 +161,6 @@ public class Main {
 	private BitbucketConfig configure( Map<String, String> properties ) {
 		BitbucketConfig config = new BitbucketConfig();
 
-		config.setProtocol( properties.get( "bitbucket-git-protocol" ) );
 		config.setRepoUri( properties.get( "bitbucket-rest-repo-uri" ) );
 		config.setTeam( properties.get( "bitbucket-team" ) );
 		config.setUsername( properties.get( "bitbucket-username" ) );

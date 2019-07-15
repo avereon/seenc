@@ -4,8 +4,6 @@ import java.util.List;
 
 public class BitbucketConfig {
 
-	private String protocol;
-
 	private String username;
 
 	private String password;
@@ -22,14 +20,6 @@ public class BitbucketConfig {
 
 	public void setProjects( List<String> projects ) {
 		this.projects = projects;
-	}
-
-	public String getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol( String protocol ) {
-		this.protocol = protocol;
 	}
 
 	public String getUsername() {
@@ -86,9 +76,6 @@ public class BitbucketConfig {
 		final Object this$tmpltProjectDir = this.getTarget();
 		final Object other$tmpltProjectDir = other.getTarget();
 		if( this$tmpltProjectDir == null ? other$tmpltProjectDir != null : !this$tmpltProjectDir.equals( other$tmpltProjectDir ) ) return false;
-		final Object this$protocol = this.getProtocol();
-		final Object other$protocol = other.getProtocol();
-		if( this$protocol == null ? other$protocol != null : !this$protocol.equals( other$protocol ) ) return false;
 		return true;
 	}
 
@@ -101,8 +88,6 @@ public class BitbucketConfig {
 		result = result * PRIME + ($tmpltProjectRepos == null ? 43 : $tmpltProjectRepos.hashCode());
 		final Object $tmpltProjectDir = this.getTarget();
 		result = result * PRIME + ($tmpltProjectDir == null ? 43 : $tmpltProjectDir.hashCode());
-		final Object $tmpltProtocol = this.getProtocol();
-		result = result * PRIME + ($tmpltProtocol == null ? 43 : $tmpltProtocol.hashCode());
 		return result;
 	}
 
@@ -111,6 +96,6 @@ public class BitbucketConfig {
 	}
 
 	public String toString() {
-		return "BitbucketConfig(" + "protocol=" + this.getProtocol() + ", team=" + this.getTeam() + ", username=" + this.getUsername() + ", projectRepos=" + this.getRepoUri() + ", projectDir=" + this.getTarget() + ")";
+		return "BitbucketConfig(" + "team=" + this.getTeam() + ", username=" + this.getUsername() + ", projectRepos=" + this.getRepoUri() + ", projectDir=" + this.getTarget() + ")";
 	}
 }

@@ -2,50 +2,42 @@ package com.xeomar.seenc;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Bitbucket client class.
  */
-public class BitbucketClient implements RepoClient {
+public class BitbucketClient extends RepoClient {
 
 	private static final Logger log = LoggerFactory.getLogger( BitbucketClient.class );
 
-	private BitbucketConfig config;
-
 	private RestTemplate rest;
 
-	public BitbucketClient( BitbucketConfig config ) {
-		this.config = config;
+	BitbucketClient( BitbucketConfig config ) {
+		super( config );
 
 		// Set up REST template
 		rest = new RestTemplate();
 		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.getUsername(), config.getPassword() ) );
 	}
 
-	public Set<GitRepo> getBitbucketRepos() {
-		Set<GitRepo> repos = new HashSet<GitRepo>();
+	public Set<GitRepo> getRepos() {
+		Set<GitRepo> repos = new HashSet<>();
 
-		UriTemplate repoUri = new UriTemplate( config.getRepoUri() );
-		URI nextUri = repoUri.expand( config.getTeam() );
+		UriTemplate repoUri = new UriTemplate( getConfig().getRepoUri() );
+		URI nextUri = repoUri.expand( Map.of( "account", getConfig().getTeam() ) );
 
 		// Run through all the pages to get the repository parameters.
 		int page = 1;
@@ -72,15 +64,16 @@ public class BitbucketClient implements RepoClient {
 	}
 
 	private Set<GitRepo> parseBitbucketRepos( ObjectNode node ) {
-		Set<GitRepo> repos = new HashSet<GitRepo>();
+		Set<GitRepo> repos = new HashSet<>();
 
 		// Parse the Bitbucket data into repo objects
 		try {
 			for( JsonNode repoNode : node.get( "values" ) ) {
+				//System.out.println( repoNode );
 				String repoName = repoNode.get( "name" ).asText().toLowerCase();
 				String projectName = repoNode.get( "project" ).get( "name" ).asText().toLowerCase();
 
-				UriTemplate targetUri = new UriTemplate( config.getTarget() );
+				UriTemplate targetUri = new UriTemplate( getConfig().getTarget() );
 				Path targetPath = Paths.get( targetUri.expand( projectName, repoName ) );
 
 				GitRepo gitRepo = new GitRepo();
@@ -100,25 +93,12 @@ public class BitbucketClient implements RepoClient {
 	}
 
 	private String getCloneUri( JsonNode repo ) {
-		String protocol = config.getProtocol().toLowerCase();
 		for( JsonNode clone : repo.get( "links" ).get( "clone" ) ) {
-			if( clone.get( "name" ).asText().toLowerCase().equals( protocol ) ) {
+			if( clone.get( "name" ).asText().toLowerCase().equals( "https" ) ) {
 				return clone.get( "href" ).asText();
 			}
 		}
 		return null;
-	}
-
-	public int doGitPull( Path repo ) throws IOException, GitAPIException {
-		PullResult result = Git.open( repo.toFile() ).pull().setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
-		MergeResult.MergeStatus status = result.getMergeResult().getMergeStatus();
-		return status == MergeResult.MergeStatus.ALREADY_UP_TO_DATE ? 0 : 1;
-	}
-
-	public int doGitClone( Path repo, String uri ) throws IOException, GitAPIException {
-		Files.createDirectories( repo );
-		Git.cloneRepository().setURI( uri ).setDirectory( repo.toFile() ).setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.getUsername(), config.getPassword() ) ).call();
-		return 0;
 	}
 
 }

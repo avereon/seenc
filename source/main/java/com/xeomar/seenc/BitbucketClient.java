@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * Bitbucket client class.
  */
-public class BitbucketClient {
+public class BitbucketClient implements RepoClient {
 
 	private static final Logger log = LoggerFactory.getLogger( BitbucketClient.class );
 
@@ -48,9 +48,9 @@ public class BitbucketClient {
 		URI nextUri = repoUri.expand( config.getTeam() );
 
 		// Run through all the pages to get the repository parameters.
-		int count = 0;
+		int page = 1;
 		while( nextUri != null ) {
-			log.info( "Getting repositories page " + ++count + "..." );
+			log.info( "Getting repositories page " + page + "..." );
 
 			// Call Bitbucket for data
 			ObjectNode node = rest.getForObject( nextUri, ObjectNode.class );
@@ -65,6 +65,7 @@ public class BitbucketClient {
 			} catch( URISyntaxException exception ) {
 				log.error( "Error parsing next URI", exception );
 			}
+			page++;
 		}
 
 		return repos;

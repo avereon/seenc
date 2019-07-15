@@ -46,22 +46,19 @@ public class Main {
 			return;
 		}
 
+		// Load the default configuration
+		Map<String, String> properties = new HashMap<>( loadPropertiesFromResource() );
+
 		// Process the command line parameters
-		CommandLine cli = null;
 		try {
-			cli = new DefaultParser().parse( getOptions(), commands, false );
+			CommandLine cli = new DefaultParser().parse( getOptions(), commands, false );
+			// Load config from file
+			properties.putAll( loadPropertiesFromConfig( cli.getOptionValue( "config" ) ) );
+			// Load properties from command line
+			properties.putAll( loadPropertiesFromCli( cli ) );
 		} catch( ParseException exception ) {
 			log.error( "Unable to parse command line parameters", exception );
 		}
-
-		// Load the configuration
-		Map<String, String> properties = new HashMap<>();
-		// Load defaults from resource
-		loadPropertiesFromResource( properties );
-		// Load config from file
-		loadPropertiesFromConfig( cli.getOptionValue( "config" ), properties );
-		// Load properties from command line
-		loadPropertiesFromCli( cli, properties );
 
 		processRepositories( configure( properties ) );
 	}
@@ -81,19 +78,20 @@ public class Main {
 			Path localPath = repo.getLocalPath();
 			String message = repo + ": " + localPath.toAbsolutePath();
 			boolean exists = Files.exists( localPath );
+			GitResult result;
 			try {
-				GitResult result;
 				if( exists ) {
-					result = client.doGitPull( localPath ) == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATES;
+					result = client.doGitPull( localPath ) == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATED;
 				} else {
 					client.doGitClone( localPath, repo.getRemote() );
 					result = GitResult.CLONE_SUCCESS;
 				}
 
-				log.info( result.getSymbol() + " " + message );
 			} catch( Exception exception ) {
-				log.error( "X " + message, exception );
+				result = GitResult.ERROR;
+				message += ": " + exception.getMessage();
 			}
+			log.info( result.getSymbol() + " " + message );
 		}
 	}
 
@@ -113,32 +111,37 @@ public class Main {
 		return options;
 	}
 
-	private void loadPropertiesFromResource( Map<String, String> properties ) {
+	private Map<String, String> loadPropertiesFromResource() {
 		Properties resourceProperties = new Properties();
 		try( InputStream input = getClass().getResourceAsStream( CONFIG_DEFAULT ) ) {
 			resourceProperties.load( input );
 		} catch( IOException exception ) {
 			log.error( "Unable to load properties from resource: " + CONFIG_DEFAULT, exception );
 		}
+
+		Map<String, String> properties = new HashMap<>();
 		for( Object keyObject : resourceProperties.keySet() ) {
 			String key = keyObject.toString();
 			properties.put( key, resourceProperties.getProperty( key ) );
 		}
+
+		return properties;
 	}
 
-	private void loadPropertiesFromCli( CommandLine cli, Map<String, String> properties ) {
+	private Map<String, String> loadPropertiesFromCli( CommandLine cli ) {
+		Map<String, String> properties = new HashMap<>();
 		for( Option option : cli.getOptions() ) {
 			String key = option.getLongOpt();
 			if( key != null ) properties.put( key, option.getValue() );
 		}
+
+		return properties;
 	}
 
-	private void loadPropertiesFromConfig( String config, Map<String, String> properties ) {
-		if( config == null ) return;
+	private Map<String, String> loadPropertiesFromConfig( String config ) {
+		if( config == null ) return Map.of();
 
-		//		File file = new File( config );
-		//		if( !file.isAbsolute() ) file = new File( System.getProperty( "user.dir"), config );
-
+		Map<String, String> properties = new HashMap<>();
 		try( FileInputStream input = new FileInputStream( new File( config ) ) ) {
 			Properties configProperties = new Properties();
 			configProperties.load( input );
@@ -151,6 +154,8 @@ public class Main {
 		} catch( IOException exception ) {
 			log.error( "Unable to load config file: " + config, exception );
 		}
+
+		return properties;
 	}
 
 	private BitbucketConfig configure( Map<String, String> properties ) {
@@ -187,18 +192,28 @@ public class Main {
 
 	private void printHelp() {
 		StringBuilder examples = new StringBuilder();
-		examples.append("\n");
-		examples.append("Repos: fab, mvs, psm, sbc, sod, xeo\n");
-		examples.append("\n");
-		examples.append("Config file example contents:\n");
-		examples.append("  target=file:/home/ecco/Data/xeo/code/{project}/{repo}\n");
-		examples.append("  bitbucket-team=xeomar\n");
-		examples.append("  bitbucket-username=<username>\n");
-		examples.append("  bitbucket-password=<password>\n");
+		examples.append( "\n" );
+		examples.append( "Repos: fab, mvs, psm, sbc, sod, xeo\n" );
+		examples.append( "\n" );
+		examples.append( "Config file example contents:\n" );
+		examples.append( "  target=file:/home/ecco/Data/xeo/code/{project}/{repo}\n" );
+		examples.append( "  bitbucket-team=xeomar\n" );
+		examples.append( "  bitbucket-username=<username>\n" );
+		examples.append( "  bitbucket-password=<password>\n" );
 
 		StringWriter writer = new StringWriter();
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( new PrintWriter( writer ), formatter.getWidth(), "seenc [OPTION]... <repo>", null, getOptions(), formatter.getLeftPadding(), formatter.getDescPadding(), examples.toString(), false );
+		formatter.printHelp(
+			new PrintWriter( writer ),
+			formatter.getWidth(),
+			"seenc [OPTION]... <repo>",
+			null,
+			getOptions(),
+			formatter.getLeftPadding(),
+			formatter.getDescPadding(),
+			examples.toString(),
+			false
+		);
 
 		System.out.println();
 		System.out.println( writer.toString() );

@@ -1,4 +1,4 @@
-package com.xeomar.seenc;
+package com.avereon.seenc;
 
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -192,11 +192,11 @@ public class Main {
 	private void printHelp() {
 		StringBuilder examples = new StringBuilder();
 		examples.append( "\n" );
-		examples.append( "Repos: fab, mvs, psm, sbc, sod, xeo\n" );
+		examples.append( "Repos: avn, fab, mvs, psm, sbc, sod\n" );
 		examples.append( "\n" );
 		examples.append( "Config file example contents:\n" );
-		examples.append( "  target=file:/home/ecco/Data/xeo/code/{project}/{repo}\n" );
-		examples.append( "  bitbucket-team=xeomar\n" );
+		examples.append( "  target=file:/home/ecco/Data/avn/code/{project}/{repo}\n" );
+		examples.append( "  bitbucket-team=avereon\n" );
 		examples.append( "  bitbucket-username=<username>\n" );
 		examples.append( "  bitbucket-password=<password>\n" );
 

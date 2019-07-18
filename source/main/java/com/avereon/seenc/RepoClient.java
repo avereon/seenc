@@ -1,4 +1,4 @@
-package com.xeomar.seenc;
+package com.avereon.seenc;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;

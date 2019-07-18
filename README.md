@@ -1,3 +1,3 @@
-# Parallel Symmetry Reposync
+# Avereon Reposync
 
-Clones or pulls repositories from BitBucket
+Clones or pulls repositories from Git providers like GitHub, BitBucket, etc.

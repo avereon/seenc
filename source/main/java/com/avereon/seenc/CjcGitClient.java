@@ -1,4 +1,4 @@
-package com.xeomar.seenc;
+package com.avereon.seenc;
 
 import java.util.Set;
 

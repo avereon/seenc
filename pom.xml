@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.xeomar.pom</groupId>
+		<groupId>com.avereon.pom</groupId>
 		<artifactId>prd</artifactId>
 		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>com.xeomar</groupId>
+	<groupId>com.avereon</groupId>
 	<artifactId>seenc</artifactId>
 	<version>1.2.1</version>
 
@@ -17,14 +17,14 @@
 	<inceptionYear>2017</inceptionYear>
 
 	<organization>
-		<name>Xeomar</name>
-		<url>http://www.xeomar.com</url>
+		<name>Avereon</name>
+		<url>http://www.avereon.com</url>
 	</organization>
 
 	<repositories>
 		<repository>
-			<id>xeo</id>
-			<url>https://repo.xeomar.com/xeo</url>
+			<id>avn</id>
+			<url>https://repo.avereon.com/avn</url>
 		</repository>
 	</repositories>
 
@@ -76,7 +76,7 @@
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<mainClass>com.xeomar.seenc.Main</mainClass>
+									<mainClass>com.avereon.seenc.Main</mainClass>
 								</manifest>
 							</archive>
 						</configuration>

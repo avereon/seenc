@@ -3,7 +3,7 @@
   "artifact": "${project.artifactId}",
   "version": "${project.version}",
   "timestamp": "${project.timestamp}",
-  "iconUri": "https://xeomar.com/images/icons/${project.artifactId}.png",
+  "iconUri": "https://www.avereon.com/images/icons/${project.artifactId}.png",
   "name": "${project.name}",
   "provider": "${project.organization.name}",
   "providerUrl": "${project.organization.url}",
@@ -12,16 +12,16 @@
   "description": "${project.description}",
   "copyrightSummary": "All rights reserved.",
   "licenseSummary": "${project.name} comes with ABSOLUTELY NO WARRANTY. This is open software, and you are welcome to redistribute it under certain conditions.",
-  "productUri": "https://xeomar.com/download",
-  "mainClass": "com.xeomar.seenc.Main",
+  "productUri": "https://avereon.com/download",
+  "mainClass": "com.avereon.seenc.Main",
   "javaVersion": "11",
   "maintainers": [
   {
     "name": "Mark Soderquist",
-    "email": "mark.soderquist@xeomar.com",
+    "email": "mark.soderquist@avereon.com",
     "timezone": null,
-    "organization": "Xeomar",
-    "organizationUrl": "http://www.xeomar.com",
+    "organization": "Avereon",
+    "organizationUrl": "http://www.avereon.com",
     "roles": [ "Architect", "Developer" ]
   }
   ],

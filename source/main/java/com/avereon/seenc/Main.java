@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * The main class.
@@ -60,39 +60,14 @@ public class Main {
 			log.error( "Unable to parse command line parameters", exception );
 		}
 
-		processRepositories( configure( properties ) );
-	}
-
-	private void processRepositories( BitbucketConfig config ) {
-		RepoClient client = RepoClientFactory.getRepoClient( config );
-
-		log.info( "Requesting repositories for " + config.getTeam() + "..." );
-
-		Set<GitRepo> repos = client.getRepos();
-		log.info( "Repository count: " + repos.size() );
-
-		List<GitRepo> sortedRepos = new ArrayList<>( repos );
-		Collections.sort( sortedRepos );
-
-		for( GitRepo repo : sortedRepos ) {
-			Path localPath = repo.getLocalPath();
-			String message = repo + ": " + localPath.toAbsolutePath();
-			boolean exists = Files.exists( localPath );
-			GitResult result;
-			try {
-				if( exists ) {
-					result = client.doGitPull( localPath ) == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATED;
-				} else {
-					client.doGitClone( localPath, repo.getRemote() );
-					result = GitResult.CLONE_SUCCESS;
-				}
-
-			} catch( Exception exception ) {
-				result = GitResult.ERROR;
-				message += ": " + exception.getMessage();
-			}
-			log.info( result.getSymbol() + " " + message );
+		// Determine repository client
+		RepoClient client = RepoClientFactory.getRepoClient( new RepoClientConfig( properties ) );
+		if( client == null ) {
+			log.error( "Unable to determine client" );
+			return;
 		}
+
+		client.processRepositories();
 	}
 
 	protected Options getOptions() {
@@ -102,11 +77,11 @@ public class Main {
 		//options.addOption( Option.builder().longOpt( "projects" ).numberOfArgs( 1 ).argName( "project list" ).build() );
 		options.addOption( Option.builder().longOpt( "target" ).numberOfArgs( 1 ).argName( "folder" ).build() );
 
-		options.addOption( Option.builder().longOpt( "bitbucket-username" ).numberOfArgs( 1 ).argName( "username" ).build() );
-		options.addOption( Option.builder().longOpt( "bitbucket-password" ).numberOfArgs( 1 ).argName( "password" ).build() );
-		options.addOption( Option.builder().longOpt( "bitbucket-team" ).numberOfArgs( 1 ).argName( "team" ).build() );
-		options.addOption( Option.builder().longOpt( "bitbucket-rest-repo-uri" ).numberOfArgs( 1 ).argName( "uri" ).build() );
-		options.addOption( Option.builder().longOpt( "bitbucket-git-protocol" ).numberOfArgs( 1 ).argName( "protocol" ).build() );
+		options.addOption( Option.builder().longOpt( "username" ).numberOfArgs( 1 ).argName( "username" ).build() );
+		options.addOption( Option.builder().longOpt( "password" ).numberOfArgs( 1 ).argName( "password" ).build() );
+		options.addOption( Option.builder().longOpt( "team" ).numberOfArgs( 1 ).argName( "team" ).build() );
+		options.addOption( Option.builder().longOpt( "rest-repo-uri" ).numberOfArgs( 1 ).argName( "uri" ).build() );
+		options.addOption( Option.builder().longOpt( "git-protocol" ).numberOfArgs( 1 ).argName( "protocol" ).build() );
 
 		return options;
 	}
@@ -158,17 +133,17 @@ public class Main {
 		return properties;
 	}
 
-	private BitbucketConfig configure( Map<String, String> properties ) {
-		BitbucketConfig config = new BitbucketConfig();
-
-		config.setRepoUri( properties.get( "bitbucket-rest-repo-uri" ) );
-		config.setTeam( properties.get( "bitbucket-team" ) );
-		config.setUsername( properties.get( "bitbucket-username" ) );
-		config.setPassword( properties.get( "bitbucket-password" ) );
-		config.setTarget( properties.get( "target" ) );
-
-		return config;
-	}
+//	private BitbucketConfig configure( Map<String, String> properties ) {
+//		BitbucketConfig config = new BitbucketConfig();
+//
+//		config.setRepoUri( properties.get( "bitbucket-rest-repo-uri" ) );
+//		config.setTeam( properties.get( "bitbucket-team" ) );
+//		config.setUsername( properties.get( "bitbucket-username" ) );
+//		config.setPassword( properties.get( "bitbucket-password" ) );
+//		config.setTarget( properties.get( "target" ) );
+//
+//		return config;
+//	}
 
 	private void describe() {
 		try {
@@ -195,10 +170,11 @@ public class Main {
 		examples.append( "Repos: avn, fab, mvs, psm, sbc, sod\n" );
 		examples.append( "\n" );
 		examples.append( "Config file example contents:\n" );
+		examples.append( "  type=BB\n" );
+		examples.append( "  team=avereon\n" );
+		examples.append( "  username=<username>\n" );
+		examples.append( "  password=<password>\n" );
 		examples.append( "  target=file:/home/ecco/Data/avn/code/{project}/{repo}\n" );
-		examples.append( "  bitbucket-team=avereon\n" );
-		examples.append( "  bitbucket-username=<username>\n" );
-		examples.append( "  bitbucket-password=<password>\n" );
 
 		StringWriter writer = new StringWriter();
 		HelpFormatter formatter = new HelpFormatter();

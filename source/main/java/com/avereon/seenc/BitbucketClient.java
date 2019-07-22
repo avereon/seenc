@@ -25,19 +25,19 @@ public class BitbucketClient extends RepoClient {
 
 	private RestTemplate rest;
 
-	BitbucketClient( BitbucketConfig config ) {
+	BitbucketClient( RepoClientConfig config ) {
 		super( config );
 
 		// Set up REST template
 		rest = new RestTemplate();
-		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.getUsername(), config.getPassword() ) );
+		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.get( "username" ), config.get( "password" ) ) );
 	}
 
 	public Set<GitRepo> getRepos() {
 		Set<GitRepo> repos = new HashSet<>();
 
-		UriTemplate repoUri = new UriTemplate( getConfig().getRepoUri() );
-		URI nextUri = repoUri.expand( Map.of( "account", getConfig().getTeam() ) );
+		UriTemplate repoUri = new UriTemplate( getConfig().get( "repoUri" ) );
+		URI nextUri = repoUri.expand( Map.of( "account", getConfig().get( "team" ) ) );
 
 		// Run through all the pages to get the repository parameters.
 		int page = 1;
@@ -63,6 +63,12 @@ public class BitbucketClient extends RepoClient {
 		return repos;
 	}
 
+	public void processRepositories() {
+		log.info( "Requesting repositories for " + getConfig().get( "team" ) + "..." );
+
+		super.processRepositories();
+	}
+
 	private Set<GitRepo> parseBitbucketRepos( ObjectNode node ) {
 		Set<GitRepo> repos = new HashSet<>();
 
@@ -73,7 +79,7 @@ public class BitbucketClient extends RepoClient {
 				String repoName = repoNode.get( "name" ).asText().toLowerCase();
 				String projectName = repoNode.get( "project" ).get( "name" ).asText().toLowerCase();
 
-				UriTemplate targetUri = new UriTemplate( getConfig().getTarget() );
+				UriTemplate targetUri = new UriTemplate( getConfig().get( "target" ) );
 				Path targetPath = Paths.get( targetUri.expand( projectName, repoName ) );
 
 				GitRepo gitRepo = new GitRepo();

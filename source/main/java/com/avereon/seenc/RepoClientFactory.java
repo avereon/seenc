@@ -2,9 +2,19 @@ package com.avereon.seenc;
 
 public class RepoClientFactory {
 
-	public static RepoClient getRepoClient( BitbucketConfig config ) {
-		// FIXME Determine client implementation from configuration
-		return new BitbucketClient( config );
+	public static RepoClient getRepoClient( RepoClientConfig config ) {
+		String clientType = config.get( "type" );
+
+		switch( clientType ) {
+			case "BB" : {
+				return new BitbucketClient( config );
+			}
+			case "GH" : {
+				return new GithubClient( config );
+			}
+		}
+
+		return null;
 	}
 
 }

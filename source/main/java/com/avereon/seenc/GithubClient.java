@@ -2,15 +2,15 @@ package com.avereon.seenc;
 
 import java.util.Set;
 
-public class CjcGitClient extends RepoClient {
+public class GithubClient extends RepoClient {
 
-	protected CjcGitClient( RepoClientConfig config ) {
+	protected GithubClient( RepoClientConfig config ) {
 		super( config );
 	}
 
 	@Override
 	public Set<GitRepo> getRepos() {
-		return Set.of();
+		return null;
 	}
 
 	@Override

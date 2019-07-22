@@ -36,7 +36,7 @@ public class BitbucketClient extends RepoClient {
 	public Set<GitRepo> getRepos() {
 		Set<GitRepo> repos = new HashSet<>();
 
-		UriTemplate repoUri = new UriTemplate( getConfig().get( "repoUri" ) );
+		UriTemplate repoUri = new UriTemplate( getConfig().get( "BB-rest-repo-uri" ) );
 		URI nextUri = repoUri.expand( Map.of( "account", getConfig().get( "team" ) ) );
 
 		// Run through all the pages to get the repository parameters.

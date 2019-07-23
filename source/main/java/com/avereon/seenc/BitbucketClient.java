@@ -2,6 +2,7 @@ package com.avereon.seenc;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
@@ -78,10 +79,11 @@ public class BitbucketClient extends RepoClient {
 		// Parse the Bitbucket data into repo objects
 		try {
 			for( JsonNode repoNode : node.get( "values" ) ) {
-				//System.out.println( repoNode );
 				String repoName = repoNode.get( "name" ).asText().toLowerCase();
 				String projectName = repoNode.get( "project" ).get( "name" ).asText().toLowerCase();
-				if( project != null ) projectName = project.toLowerCase();
+
+				// Project name override
+				if( !TextUtils.isBlank( project ) ) projectName = project.toLowerCase();
 
 				UriTemplate targetUri = new UriTemplate( getConfig().get( "target" ) );
 				Path targetPath = Paths.get( targetUri.expand( projectName, repoName ) );

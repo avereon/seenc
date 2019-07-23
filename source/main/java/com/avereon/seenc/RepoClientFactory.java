@@ -9,6 +9,9 @@ public class RepoClientFactory {
 			case "BB" : {
 				return new BitbucketClient( config );
 			}
+			case "CJC" : {
+				return new CjcGitClient( config );
+			}
 			case "GH" : {
 				return new GithubClient( config );
 			}

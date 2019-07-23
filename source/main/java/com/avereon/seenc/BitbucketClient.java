@@ -36,6 +36,9 @@ public class BitbucketClient extends RepoClient {
 	public Set<GitRepo> getRepos() {
 		Set<GitRepo> repos = new HashSet<>();
 
+		// Can be used to override the repo project name
+		String project = getConfig().get( "project" );
+
 		UriTemplate repoUri = new UriTemplate( getConfig().get( "BB-rest-repo-uri" ) );
 		URI nextUri = repoUri.expand( Map.of( "account", getConfig().get( "team" ) ) );
 
@@ -48,7 +51,7 @@ public class BitbucketClient extends RepoClient {
 			ObjectNode node = rest.getForObject( nextUri, ObjectNode.class );
 
 			// Parse and add the repos
-			repos.addAll( parseBitbucketRepos( node ) );
+			repos.addAll( parseBitbucketRepos( project, node ) );
 
 			// Get the next page
 			try {
@@ -69,7 +72,7 @@ public class BitbucketClient extends RepoClient {
 		super.processRepositories();
 	}
 
-	private Set<GitRepo> parseBitbucketRepos( ObjectNode node ) {
+	Set<GitRepo> parseBitbucketRepos( String project, ObjectNode node ) {
 		Set<GitRepo> repos = new HashSet<>();
 
 		// Parse the Bitbucket data into repo objects
@@ -78,6 +81,7 @@ public class BitbucketClient extends RepoClient {
 				//System.out.println( repoNode );
 				String repoName = repoNode.get( "name" ).asText().toLowerCase();
 				String projectName = repoNode.get( "project" ).get( "name" ).asText().toLowerCase();
+				if( project != null ) projectName = project.toLowerCase();
 
 				UriTemplate targetUri = new UriTemplate( getConfig().get( "target" ) );
 				Path targetPath = Paths.get( targetUri.expand( projectName, repoName ) );
@@ -98,9 +102,10 @@ public class BitbucketClient extends RepoClient {
 		return repos;
 	}
 
-	private String getCloneUri( JsonNode repo ) {
+	String getCloneUri( JsonNode repo ) {
 		for( JsonNode clone : repo.get( "links" ).get( "clone" ) ) {
-			if( clone.get( "name" ).asText().toLowerCase().equals( "https" ) ) {
+			String protocol = clone.get( "name" ).asText().toLowerCase();
+			if( protocol.equals( "https" ) || protocol.equals( "http" ) ) {
 				return clone.get( "href" ).asText();
 			}
 		}

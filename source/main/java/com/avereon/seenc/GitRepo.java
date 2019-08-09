@@ -49,7 +49,10 @@ public class GitRepo implements Comparable<GitRepo> {
 
 	@Override
 	public String toString() {
-		return getProject() + "/" + getName();
+		StringBuilder builder = new StringBuilder();
+		if( getProject() != null ) builder.append( getProject() ).append( "/" );
+		builder.append( getName() );
+		return builder.toString();
 	}
 
 	@Override

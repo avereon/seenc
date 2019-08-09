@@ -12,7 +12,11 @@ public class RepoClientConfig {
 	}
 
 	public String get( String key ) {
-		return values.getOrDefault( key, "" );
+		return values.getOrDefault( key, "" ).trim();
+	}
+
+	public boolean exists( String key ) {
+		return !"".equals( get( key ) );
 	}
 
 }

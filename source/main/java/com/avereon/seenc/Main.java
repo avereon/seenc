@@ -63,7 +63,7 @@ public class Main {
 		// Determine repository client
 		RepoClient client = RepoClientFactory.getRepoClient( new RepoClientConfig( properties ) );
 		if( client == null ) {
-			log.error( "Unable to determine client" );
+			log.error( "Unable to determine client type" );
 			return;
 		}
 

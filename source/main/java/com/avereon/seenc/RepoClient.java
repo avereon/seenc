@@ -7,6 +7,9 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.client.support.BasicAuthorizationInterceptor;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriTemplate;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,15 +25,19 @@ public abstract class RepoClient {
 
 	private RepoClientConfig config;
 
+	private RestTemplate rest;
+
 	protected RepoClient( RepoClientConfig config ) {
 		this.config = config;
+		rest = new RestTemplate();
+		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.get( "username" ), config.get( "password" ) ) );
 	}
 
 	public abstract Set<GitRepo> getRepos();
 
 	public void processRepositories(){
 		Set<GitRepo> repos = getRepos();
-		log.info( "Repository count: " + repos.size() );
+		System.out.println( "Repository count: " + repos.size() );
 
 		List<GitRepo> sortedRepos = new ArrayList<>( repos );
 		Collections.sort( sortedRepos );
@@ -52,7 +59,7 @@ public abstract class RepoClient {
 				result = GitResult.ERROR;
 				message += ": " + exception.getMessage();
 			}
-			log.info( result.getSymbol() + " " + message );
+			System.out.println( result.getSymbol() + " " + message );
 		}
 	}
 
@@ -79,6 +86,17 @@ public abstract class RepoClient {
 
 	protected RepoClientConfig getConfig() {
 		return config;
+	}
+
+	protected UriTemplate getUriTemplate() {
+		UriTemplate template = null;
+		if( getConfig().exists( "uri" ) ) template = new UriTemplate( getConfig().get( "uri" ) );
+		if( template == null ) template = new UriTemplate( getConfig().get( getConfig().get( "type" ) + "-uri" ) );
+		return template;
+	}
+
+	protected RestTemplate getRest() {
+		return rest;
 	}
 
 }

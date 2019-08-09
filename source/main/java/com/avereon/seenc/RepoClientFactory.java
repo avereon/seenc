@@ -6,14 +6,14 @@ public class RepoClientFactory {
 		String clientType = config.get( "type" );
 
 		switch( clientType ) {
-			case "BB" : {
-				return new BitbucketClient( config );
+			case "BB1" : {
+				return new Bitbucket1Client( config );
 			}
-			case "CJC" : {
-				return new CjcGitClient( config );
+			case "BB2" : {
+				return new Bitbucket2Client( config );
 			}
-			case "GH" : {
-				return new GithubClient( config );
+			case "GH3" : {
+				return new Github3Client( config );
 			}
 		}
 

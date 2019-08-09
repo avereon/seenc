@@ -11,4 +11,13 @@
 		</server>
 	</servers>
 
+	<mirrors>
+		<mirror>
+			<id>mirror-mvn-avn</id>
+			<name>Mirror to Avereon Maven Repository</name>
+			<url>https://repo.avereon.com/avn</url>
+			<mirrorOf>*,!central</mirrorOf>
+		</mirror>
+	</mirrors>
+
 </settings>

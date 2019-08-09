@@ -80,8 +80,9 @@ public class Main {
 		options.addOption( Option.builder().longOpt( "username" ).numberOfArgs( 1 ).argName( "username" ).build() );
 		options.addOption( Option.builder().longOpt( "password" ).numberOfArgs( 1 ).argName( "password" ).build() );
 		options.addOption( Option.builder().longOpt( "team" ).numberOfArgs( 1 ).argName( "team" ).build() );
-		options.addOption( Option.builder().longOpt( "rest-repo-uri" ).numberOfArgs( 1 ).argName( "uri" ).build() );
-		options.addOption( Option.builder().longOpt( "git-protocol" ).numberOfArgs( 1 ).argName( "protocol" ).build() );
+		options.addOption( Option.builder().longOpt( "type" ).numberOfArgs( 1 ).argName( "type" ).build() );
+		options.addOption( Option.builder().longOpt( "uri" ).numberOfArgs( 1 ).argName( "uri" ).build() );
+		//options.addOption( Option.builder().longOpt( "git-protocol" ).numberOfArgs( 1 ).argName( "protocol" ).build() );
 
 		return options;
 	}

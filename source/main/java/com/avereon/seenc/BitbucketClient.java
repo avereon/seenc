@@ -28,8 +28,6 @@ public class BitbucketClient extends RepoClient {
 
 	BitbucketClient( RepoClientConfig config ) {
 		super( config );
-
-		// Set up REST template
 		rest = new RestTemplate();
 		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.get( "username" ), config.get( "password" ) ) );
 	}
@@ -40,7 +38,7 @@ public class BitbucketClient extends RepoClient {
 		// Can be used to override the repo project name
 		String project = getConfig().get( "project" );
 
-		UriTemplate repoUri = new UriTemplate( getConfig().get( "BB-rest-repo-uri" ) );
+		UriTemplate repoUri = new UriTemplate( getConfig().get( "BB-uri" ) );
 		URI nextUri = repoUri.expand( Map.of( "account", getConfig().get( "team" ) ) );
 
 		// Run through all the pages to get the repository parameters.

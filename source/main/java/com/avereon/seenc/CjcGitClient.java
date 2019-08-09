@@ -26,7 +26,7 @@ public class CjcGitClient extends BitbucketClient {
 		Set<GitRepo> repos = new HashSet<>();
 
 		List<String> projects = Arrays.stream( getConfig().get( "projects" ).split( "," ) ).map( String::trim ).collect( Collectors.toList() );
-		UriTemplate repoUri = new UriTemplate( getConfig().get( "CJC-rest-repo-uri" ) );
+		UriTemplate repoUri = new UriTemplate( getConfig().get( "CJC-uri" ) );
 
 		for( String project : projects ) {
 			URI uri = repoUri.expand( Map.of( "project", project ) );

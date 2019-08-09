@@ -31,10 +31,7 @@ public class Bitbucket2Client extends Bitbucket0Client {
 		URI nextUri = getUriTemplate().expand( Map.of( "account", getConfig().get( "team" ) ) );
 
 		// Run through all the pages to get the repository parameters.
-		int page = 1;
 		while( nextUri != null ) {
-			log.info( "Getting repositories page " + page + "..." );
-
 			// Call Bitbucket for data
 			ObjectNode node = getRest().getForObject( nextUri, ObjectNode.class );
 
@@ -44,11 +41,10 @@ public class Bitbucket2Client extends Bitbucket0Client {
 			// Get the next page
 			try {
 				JsonNode nextNode = node.get( "next" );
-				nextUri = nextNode == null ? null : new URI( node.get( "next" ).asText() );
+				nextUri = nextNode == null ? null : new URI( nextNode.asText() );
 			} catch( URISyntaxException exception ) {
 				log.error( "Error parsing next URI", exception );
 			}
-			page++;
 		}
 
 		return repos;

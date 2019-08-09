@@ -40,7 +40,6 @@ public class Github3Client extends RepoClient {
 	}
 
 	public void processRepositories() {
-		log.info( "Requesting repositories for " + getConfig().get( "team" ) + "..." );
 		super.processRepositories();
 	}
 

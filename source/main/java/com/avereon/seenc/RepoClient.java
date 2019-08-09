@@ -91,7 +91,7 @@ public abstract class RepoClient {
 	protected UriTemplate getUriTemplate() {
 		UriTemplate template = null;
 		if( getConfig().exists( "uri" ) ) template = new UriTemplate( getConfig().get( "uri" ) );
-		if( template == null ) template = new UriTemplate( getConfig().get( getConfig().get( "type" ) + "-uri" ) );
+		if( template == null ) template = new UriTemplate( getConfig().get( getConfig().get( "type" ) + "-default-uri" ) );
 		return template;
 	}
 

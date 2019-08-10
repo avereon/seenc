@@ -1,6 +1,8 @@
-# Seenc
+[build-status]: https://travis-ci.org/avereon/seenc.svg?branch=master "Build status"
 
-Clones or pulls repositories from Git providers like GitHub, BitBucket, etc. 
+# Seenc ![alt text][build-status]
+
+Clone or pull repositories from Git providers like GitHub, BitBucket, etc. 
 
 The motivation for the project was to have command line tool to synchronize
 all repositories for a user, team, account or other group defined by a provider. 

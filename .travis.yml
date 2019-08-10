@@ -4,4 +4,4 @@ cache:
   directories:
     - $HOME/.m2
 
-script: mvn --settings .travis/settings.xml -DskipTests=true -Dmaven.javadoc.skip=true -B -U -V clean install
+script: mvn --settings .travis/settings.xml -DskipTests=true -Dmaven.javadoc.skip=true -B -U -V deploy

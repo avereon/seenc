@@ -28,6 +28,13 @@
 		</repository>
 	</repositories>
 
+	<pluginRepositories>
+		<pluginRepository>
+			<id>avn-plugin</id>
+			<url>https://repo.avereon.com/avn</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>

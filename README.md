@@ -14,9 +14,9 @@ of all repositories in the group when setting up a new computer.
 
 | Key | Provider  | API | Parameters |
 |-----|-----------|:----|------------|
-| GH3 | GitHub    | v3  | org        |
-| BB1 | Bitbucket | 1.0 | project    |
-| BB2 | Bitbucket | 2.0 | account    |
+| GH3 | GitHub    | v3  | orgs       |
+| BB2 | Bitbucket | 2.0 | teams      |
+| BB1 | Bitbucket | 1.0 | projects   |
 
 ## Configuration Files
 Seenc parameters can be provided as a configuration file in Java properties 

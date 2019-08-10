@@ -1,7 +1,10 @@
 package com.avereon.seenc;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RepoClientConfig {
 
@@ -11,12 +14,16 @@ public class RepoClientConfig {
 		this.values = new HashMap<>( values );
 	}
 
+	public boolean exists( String key ) {
+		return !"".equals( get( key ) );
+	}
+
 	public String get( String key ) {
 		return values.getOrDefault( key, "" ).trim();
 	}
 
-	public boolean exists( String key ) {
-		return !"".equals( get( key ) );
+	public List<String> getAll( String key ) {
+		return Arrays.stream( get( key ).split( "," ) ).map( String::trim ).collect( Collectors.toList() );
 	}
 
 }

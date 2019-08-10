@@ -11,7 +11,6 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class Github3Client extends RepoClient {
@@ -28,12 +27,17 @@ public class Github3Client extends RepoClient {
 
 	@Override
 	public Set<GitRepo> getRepos() {
-		URI uri = getUriTemplate().expand( Map.of( "org", getConfig().get( "org" ) ) );
-
 		Set<GitRepo> repos = new HashSet<>();
-		for( JsonNode json : rest.getForObject( uri, JsonNode.class ) ) {
-			if( json.get( "fork" ).asBoolean() ) continue;
-			repos.add( createRepo( json ) );
+		String username = getConfig().get( "username" );
+
+		for( String org : getConfig().getAll( "orgs" ) ) {
+			URI uri = getUriTemplate( "/orgs/{org}/repos" ).expand( org );
+			if( org.equals( username ) ) uri = getUriTemplate( "/user/repos" ).expand();
+
+			for( JsonNode json : rest.getForObject( uri, JsonNode.class ) ) {
+				if( json.get( "fork" ).asBoolean() ) continue;
+				repos.add( createRepo( json ) );
+			}
 		}
 
 		return repos;

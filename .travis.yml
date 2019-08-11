@@ -6,7 +6,7 @@ cache:
 
 install:
   - echo 'avereon.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAX0k5tSvrXVpKl7HNPIPglp6Kyj0Ypty6M3hgR783ViTzhRnojEZvdCXuYiGSVKEzZWr9oYQnLr03qjU/t0SNw=' >> $HOME/.ssh/known_hosts
-  - echo $AVN_SSH_ID_PUB >> $HOME/.ssh/id_rsa.pub
+  - echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnVq/H7MVJw0khuxvzwfP+xekqP0dt04U17RNYhMXVHVkPvSCkwWBmLxHhIWz23JvGpiitkDguHVRd0tJCMrXiNMHtqXGfeMlPuW85qCmMFznXu0p98dD/R2rXP+zkQJOG2N48LdARmMX8FLANzXgmQ2I7EQrdCWmcbsHU+qVSUH6gwMASSM4RMmFR9lBVabonrhByED/hGVpwNYT0bH+Z55ghurvLKDBu9UbF3okZqgFdXbEzqCN3I8zLe80CLhG11MXjC5EkrX1E+aNJ2hUOQNYzLF/AF+u2cBL+g8HmlEgfQBC/wkZdhKW+vHAM7H0h0bl5U4lRZ64EclKrlxS3' >> $HOME/.ssh/id_rsa.pub
   - echo $AVN_SSH_ID >> $HOME/.ssh/id_rsa
   - chmod 600 $HOME/.ssh/*
 

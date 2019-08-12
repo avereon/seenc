@@ -35,7 +35,7 @@ public abstract class RepoClient {
 
 	public abstract Set<GitRepo> getRepos();
 
-	public void processRepositories(){
+	public void processRepositories() {
 		Set<GitRepo> repos = getRepos();
 		System.out.println( "Repository count: " + repos.size() );
 
@@ -88,11 +88,16 @@ public abstract class RepoClient {
 		return config;
 	}
 
+	@Deprecated
 	protected UriTemplate getUriTemplate() {
-		UriTemplate template = null;
-		if( getConfig().exists( "uri" ) ) template = new UriTemplate( getConfig().get( "uri" ) );
-		if( template == null ) template = new UriTemplate( getConfig().get( getConfig().get( "type" ) + "-default-uri" ) );
-		return template;
+		return getUriTemplate( "" );
+	}
+
+	protected UriTemplate getUriTemplate( String path ) {
+		String endpoint = null;
+		if( getConfig().exists( "uri" ) ) endpoint = getConfig().get( "uri" );
+		if( endpoint == null ) endpoint = getConfig().get( getConfig().get( "type" ) + "-default-uri" );
+		return new UriTemplate( endpoint + path );
 	}
 
 	protected RestTemplate getRest() {

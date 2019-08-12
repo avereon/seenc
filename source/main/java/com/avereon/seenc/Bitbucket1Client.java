@@ -5,8 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Bitbucket1Client extends Bitbucket0Client {
 
@@ -20,10 +21,10 @@ public class Bitbucket1Client extends Bitbucket0Client {
 	public Set<GitRepo> getRepos() {
 		Set<GitRepo> repos = new HashSet<>();
 
-		List<String> projects = Arrays.stream( getConfig().get( "projects" ).split( "," ) ).map( String::trim ).collect( Collectors.toList() );
+		List<String> projects = getConfig().getAll( "projects" );
 
 		for( String project : projects ) {
-			URI uri = getUriTemplate().expand( Map.of( "project", project ) );
+			URI uri = getUriTemplate( "/projects/{project}/repos" ).expand( project );
 			ObjectNode node = getRest().getForObject( uri, ObjectNode.class );
 			repos.addAll( parseBitbucketRepos( project, node ) );
 		}

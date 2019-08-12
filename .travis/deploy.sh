@@ -12,4 +12,4 @@ chmod 600 $HOME/.ssh/*
 #ssh-add $HOME/.ssh/id_rsa
 
 scp target/product.jar travis@avereon.com:/opt/avn/store/stable/seenc
-scp target/target/main/java/META-INF/product.card travis@avereon.com:/opt/avn/store/stable/seenc
+scp target/main/java/META-INF/product.card travis@avereon.com:/opt/avn/store/stable/seenc

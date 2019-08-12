@@ -9,5 +9,5 @@ ssh-add /tmp/travis/id_rsa
 ssh-keygen /tmp/travis/id_rsa
 
 #eval "$(ssh-agent -s)"
-scp target/product.jar travis@avereon.com:/opt/avn/store/stable/seenc
-scp target/target/main/java/META-INF/*.card travis@avereon.com:/opt/avn/store/stable/seenc
+scp -v target/product.jar travis@avereon.com:/opt/avn/store/stable/seenc
+#scp target/target/main/java/META-INF/*.card travis@avereon.com:/opt/avn/store/stable/seenc

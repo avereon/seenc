@@ -88,9 +88,8 @@ public abstract class RepoClient {
 		return config;
 	}
 
-	@Deprecated
-	protected UriTemplate getUriTemplate() {
-		return getUriTemplate( "" );
+	protected RestTemplate getRest() {
+		return rest;
 	}
 
 	protected UriTemplate getUriTemplate( String path ) {
@@ -98,10 +97,6 @@ public abstract class RepoClient {
 		if( getConfig().exists( "uri" ) ) endpoint = getConfig().get( "uri" );
 		if( endpoint == null ) endpoint = getConfig().get( getConfig().get( "type" ) + "-default-uri" );
 		return new UriTemplate( endpoint + path );
-	}
-
-	protected RestTemplate getRest() {
-		return rest;
 	}
 
 }

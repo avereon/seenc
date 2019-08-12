@@ -10,7 +10,7 @@
 
 	<groupId>com.avereon</groupId>
 	<artifactId>seenc</artifactId>
-	<version>1.5.2</version>
+	<version>1.5.3</version>
 
 	<name>Seenc</name>
 	<description>A Bitbucket repository synchronization tool</description>

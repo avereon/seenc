@@ -26,4 +26,8 @@ public class RepoClientConfig {
 		return Arrays.stream( get( key ).split( "," ) ).map( String::trim ).collect( Collectors.toList() );
 	}
 
+	Map<String,String> getMap() {
+		return values;
+	}
+
 }

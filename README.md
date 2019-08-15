@@ -2,7 +2,7 @@
 
 # Seenc ![alt text][build-status]
 
-Clone or pull repositories from Git providers like GitHub, BitBucket, etc. 
+Clone or pull Git repositories from providers like GitHub, BitBucket, etc. 
 
 The motivation for the project was to have command line tool to synchronize
 all repositories for a user, team, account or other group defined by a provider. 
@@ -24,7 +24,7 @@ format:
 
 ```
 type=GH3
-org=myorg
+orgs=myorg
 username=myusername
 password=mypassword
 target=file:///home/myhome/code/github/{repo}
@@ -38,9 +38,9 @@ target=file:///home/myhome/code/github/{repo}
  * target - The local file system target (can use variables)
 
 ## Repository Parameters
- * org - The GitHub organization name as seen in the URL
- * account - The Bitbucket account name as seen in the URL
- * project - The Bitbucket project name as seen in the URL
+ * orgs - The GitHub organization names as seen in the URL
+ * accounts - The Bitbucket account names as seen in the URL
+ * projects - The Bitbucket project names as seen in the URL
 
 ## Variables
 Any of the configuration or repository parameters can be used as replacement 

@@ -28,11 +28,11 @@ public class Github3Client extends RepoClient {
 	@Override
 	public Set<GitRepo> getRepos() {
 		Set<GitRepo> repos = new HashSet<>();
-		String username = getConfig().get( "username" );
+		String login = getGithubUser();
 
 		for( String org : getConfig().getAll( "orgs" ) ) {
 			URI uri = getUriTemplate( "/orgs/{org}/repos" ).expand( org );
-			if( org.equals( username ) ) uri = getUriTemplate( "/user/repos" ).expand();
+			if( org.equals( login ) ) uri = getUriTemplate( "/user/repos" ).expand();
 
 			for( JsonNode json : rest.getForObject( uri, JsonNode.class ) ) {
 				if( json.get( "fork" ).asBoolean() ) continue;
@@ -43,8 +43,10 @@ public class Github3Client extends RepoClient {
 		return repos;
 	}
 
-	public void processRepositories() {
-		super.processRepositories();
+	private String getGithubUser( ) {
+		URI uri = getUriTemplate( "/user" ).expand();
+		JsonNode user = rest.getForObject( uri, JsonNode.class );
+		return user.findValue( "login" ).asText();
 	}
 
 	private GitRepo createRepo( JsonNode repoNode ) {

@@ -41,6 +41,10 @@ target=file:///home/myhome/code/github/{repo}
  * orgs - The GitHub organization names as seen in the URL
  * accounts - The Bitbucket account names as seen in the URL
  * projects - The Bitbucket project names as seen in the URL
+ * include - The list of specific projects to include. If not specified, all 
+ projects will be included.
+ * exclude - The list of specific projects to exclude. If not specified, does 
+ exclude any projects. 
 
 ## Variables
 Any of the configuration or repository parameters can be used as replacement 

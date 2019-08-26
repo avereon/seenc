@@ -23,10 +23,10 @@ public class RepoClientConfig {
 	}
 
 	public List<String> getAll( String key ) {
-		return Arrays.stream( get( key ).split( "," ) ).map( String::trim ).collect( Collectors.toList() );
+		return Arrays.stream( get( key ).split( "," ) ).map( String::trim ).filter( ( s ) -> !"".equals( s ) ).collect( Collectors.toList() );
 	}
 
-	Map<String,String> getMap() {
+	Map<String, String> getMap() {
 		return values;
 	}
 

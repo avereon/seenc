@@ -15,9 +15,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class RepoClient {
 
@@ -36,13 +36,18 @@ public abstract class RepoClient {
 	public abstract Set<GitRepo> getRepos();
 
 	public void processRepositories() {
-		Set<GitRepo> repos = getRepos();
+		List<String> include = getConfig().getAll( "include" );
+		List<String> exclude = getConfig().getAll( "exclude" );
+
+		List<GitRepo> repos = new ArrayList<>( getRepos() )
+			.stream()
+			.filter( ( repo ) -> include.size() == 0 || include.contains( repo.getName() ) )
+			.filter( ( repo ) -> !exclude.contains( repo.getName() ) )
+			.sorted()
+			.collect( Collectors.toList() );
+
 		System.out.println( "Repository count: " + repos.size() );
-
-		List<GitRepo> sortedRepos = new ArrayList<>( repos );
-		Collections.sort( sortedRepos );
-
-		for( GitRepo repo : sortedRepos ) {
+		for( GitRepo repo : repos ) {
 			Path localPath = repo.getLocalPath();
 			String message = repo + ": " + localPath.toAbsolutePath();
 			boolean exists = Files.exists( localPath );

@@ -1,0 +1,10 @@
+name: Seenc Continuous Build
+on: [push]
+
+jobs:
+  build:
+    name: Hello World
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Hello World'
+

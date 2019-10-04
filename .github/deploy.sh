@@ -23,6 +23,7 @@ fi
 
 gpg --quiet --batch --yes --decrypt --passphrase=$AVN_GPG_PASSWORD --output .github/avereon.keystore .github/avereon.keystore.gpg
 rm -rf target/jlink && mvn deploy -B -U -V -P testui,platform-specific-assemblies --settings .github/settings.xml --file pom.xml
+if [ $? -ne 0 ]; then exit 1; fi
 
 echo "Build date=$(date)"
 echo "[github.ref]=${GITHUB_REF}"
@@ -39,4 +40,6 @@ chmod 600 ${HOME}/.ssh/id_rsa.pub
 chmod 600 ${HOME}/.ssh/known_hosts
 
 scp -B target/*product.jar travis@avereon.com:/opt/avn/store/$RELEASE/$PRODUCT
+if [ $? -ne 0 ]; then exit 1; fi
 scp -B target/main/java/META-INF/*.card travis@avereon.com:/opt/avn/store/$RELEASE/$PRODUCT
+if [ $? -ne 0 ]; then exit 1; fi

@@ -4,6 +4,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,23 +50,59 @@ public abstract class RepoClient {
 		System.out.println( "Repository count: " + repos.size() );
 		for( GitRepo repo : repos ) {
 			Path localPath = repo.getLocalPath();
-			String message = repo + ": " + localPath.toAbsolutePath();
 			boolean exists = Files.exists( localPath );
-			GitResult result;
-			try {
-				if( exists ) {
-					result = doGitPull( localPath ) == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATED;
-				} else {
-					doGitClone( localPath, repo.getRemote() );
-					result = GitResult.CLONE_SUCCESS;
-				}
+			if( exists ) {
+				try {
+					Git git = Git.open( localPath.toFile() );
 
-			} catch( Exception exception ) {
-				result = GitResult.ERROR;
-				message += ": " + exception.getMessage();
+					// Get the current branch
+					String currentBranch = git.getRepository().getBranch();
+
+					List<Ref> branches = git.branchList().call();
+					for( Ref branch : branches ) {
+						try {
+							git.checkout().setName( branch.getName() ).call();
+							int result = doGitPull( localPath );
+							printResult( repo, branch, result == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATED );
+						} catch( Exception exception ) {
+							printResult( repo, branch, GitResult.ERROR, exception );
+						}
+					}
+
+					// Go back to the current branch
+					git.checkout().setName( currentBranch ).call();
+				} catch( Exception exception ) {
+					printResult( repo, GitResult.ERROR, exception );
+				}
+			} else {
+				try {
+					int result = doGitClone( localPath, repo.getRemote() );
+					printResult( repo, result == 0 ? GitResult.CLONE_SUCCESS : GitResult.ERROR );
+				} catch( Exception exception ) {
+					printResult( repo, GitResult.ERROR, exception );
+				}
 			}
-			System.out.println( result.getSymbol() + " " + message );
 		}
+	}
+
+	private void printResult( GitRepo repo, GitResult result ) {
+		printResult( repo, null, result );
+	}
+
+	private void printResult( GitRepo repo, Ref branch, GitResult result ) {
+		printResult( repo, branch, result, null );
+	}
+
+	private void printResult( GitRepo repo, GitResult result, Exception exception ) {
+		printResult( repo, null, result, exception );
+	}
+
+	private void printResult( GitRepo repo, Ref branch, GitResult result, Exception exception ) {
+		String message = repo + ": " + repo.getLocalPath().toAbsolutePath();
+		if( branch != null ) message += ":" + branch.getName();
+		if( exception != null ) message += ": " + exception.getMessage();
+
+		System.out.println( result.getSymbol() + " " + message );
 	}
 
 	public int doGitPull( Path repo ) throws IOException, GitAPIException {

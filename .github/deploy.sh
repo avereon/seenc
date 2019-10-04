@@ -47,7 +47,7 @@ sha1sum "$HOME/.ssh/id_rsa"
 sha1sum "$HOME/.ssh/id_rsa.pub"
 sha1sum "$HOME/.ssh/known_hosts"
 
-scp -B target/*product.jar travis@avereon.com:/opt/avn/store/$RELEASE/$PRODUCT
+scp -B target/*product.jar travis@avereon.com:/opt/avn/store/$RELEASE/$PRODUCT 2>&1
 if [ $? -ne 0 ]; then exit 1; fi
-scp -B target/main/java/META-INF/*.card travis@avereon.com:/opt/avn/store/$RELEASE/$PRODUCT
+scp -B target/main/java/META-INF/*.card travis@avereon.com:/opt/avn/store/$RELEASE/$PRODUCT 2>&1
 if [ $? -ne 0 ]; then exit 1; fi

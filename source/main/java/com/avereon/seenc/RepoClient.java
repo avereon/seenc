@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,7 +48,40 @@ public abstract class RepoClient {
 			.sorted()
 			.collect( Collectors.toList() );
 
-		System.out.println( "Repository count: " + repos.size() );
+		System.out.println( "Initializing..." );
+		int[] counts = getCounts( repos );
+		System.out.println( "Cloning " + counts[ 0 ] + " branches from " + counts[ 1 ] + " repositories and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repositories" );
+		processRepos( repos );
+	}
+
+	private int[] getCounts( List<GitRepo> repos ) {
+		int[] result = new int[ 4 ];
+		for( GitRepo repo : repos ) {
+			Path localPath = repo.getLocalPath();
+			boolean exists = Files.exists( localPath );
+			if( exists ) {
+				try {
+					Git git = Git.open( localPath.toFile() );
+					List<Ref> branches = git.branchList().call();
+					result[ 2 ] += branches.size();
+					result[ 3 ]++;
+				} catch( Exception exception ) {
+					System.err.println( exception.getMessage() );
+				}
+			} else {
+				try {
+					Collection<Ref> heads = Git.lsRemoteRepository().setRemote( repo.getRemote() ).setHeads( true ).call();
+					result[ 0 ] += heads.size();
+					result[ 1 ]++;
+				} catch( Exception exception ) {
+					System.err.println( exception.getMessage() );
+				}
+			}
+		}
+		return result;
+	}
+
+	private void processRepos( List<GitRepo> repos ) {
 		for( GitRepo repo : repos ) {
 			Path localPath = repo.getLocalPath();
 			boolean exists = Files.exists( localPath );

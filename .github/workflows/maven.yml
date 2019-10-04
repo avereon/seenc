@@ -20,10 +20,9 @@ jobs:
     - name: Deploy
       if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/master' || github.base_ref == 'refs/heads/stable'
       env:
+        AVN_GPG_PASSWORD: ${{ secrets.AVN_GPG_PASSWORD }}
+        AVN_KEYSTORE_PASSWORD: ${{ secrets.AVN_KEYSTORE_PASSWORD }}
         AVN_REPO_USERNAME: ${{ secrets.AVN_REPO_USERNAME }}
         AVN_REPO_PASSWORD: ${{ secrets.AVN_REPO_PASSWORD }}
         GITHUB_REF: ${{ github.ref }}
-        MATRIX_OS: ${{ matrix.os }}
-        TRAVIS_SSH_KEY: ${{ secrets.TRAVIS_SSH_KEY }}
-        TRAVIS_SSH_PUB: ${{ secrets.TRAVIS_SSH_PUB }}
       run: .github/deploy.sh

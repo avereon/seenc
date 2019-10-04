@@ -37,6 +37,10 @@
 		</mirror>
 	</mirrors>
 
+	<activeProfiles>
+		<activeProfile>avn</activeProfile>
+	</activeProfiles>
+
 	<profiles>
 		<profile>
 			<id>avn</id>

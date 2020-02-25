@@ -4,6 +4,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
@@ -98,6 +100,8 @@ public abstract class RepoClient {
 							git.checkout().setName( branch.getName() ).call();
 							int result = doGitPull( localPath );
 							printResult( repo, branch, result == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATED );
+						} catch( RefNotAdvertisedException exception ) {
+							if( log.isDebugEnabled() ) printResult( repo, branch, GitResult.MISSING );
 						} catch( Exception exception ) {
 							printResult( repo, branch, GitResult.ERROR, exception );
 						}
@@ -105,7 +109,10 @@ public abstract class RepoClient {
 
 					// Go back to the current branch
 					git.checkout().setName( currentBranch ).call();
+				} catch( RefNotFoundException exception ) {
+					if( log.isDebugEnabled() ) printResult( repo, GitResult.MISSING );
 				} catch( Exception exception ) {
+					System.err.println( "Outer Exception: " + exception.getClass().getSimpleName() );
 					printResult( repo, GitResult.ERROR, exception );
 				}
 			} else {
@@ -136,7 +143,11 @@ public abstract class RepoClient {
 		if( branch != null ) message += ":" + branch.getName();
 		if( exception != null ) message += ": " + exception.getMessage();
 
-		System.out.println( result.getSymbol() + " " + message );
+		if( result == GitResult.ERROR ) {
+			System.err.println( result.getSymbol() + " " + message );
+		} else {
+			System.out.println( result.getSymbol() + " " + message );
+		}
 	}
 
 	public int doGitPull( Path repo ) throws IOException, GitAPIException {

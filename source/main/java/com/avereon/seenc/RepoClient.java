@@ -112,7 +112,6 @@ public abstract class RepoClient {
 				} catch( RefNotFoundException exception ) {
 					if( log.isDebugEnabled() ) printResult( repo, GitResult.MISSING );
 				} catch( Exception exception ) {
-					System.err.println( "Outer Exception: " + exception.getClass().getSimpleName() );
 					printResult( repo, GitResult.ERROR, exception );
 				}
 			} else {

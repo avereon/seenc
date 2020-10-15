@@ -38,9 +38,9 @@ target=file:///home/myhome/code/github/{repo}
  * target - The local file system target (can use variables)
 
 ## Repository Parameters
- * orgs - The GitHub organization names as seen in the URL
- * accounts - The Bitbucket account names as seen in the URL
- * projects - The Bitbucket project names as seen in the URL
+ * orgs - The GitHub v3 organization names as seen in the URL
+ * teams - The Bitbucket v2 team names as seen in the URL
+ * projects - The Bitbucket v1 project names as seen in the URL
  * include - The list of specific projects to include. If not specified, all 
  projects will be included.
  * exclude - The list of specific projects to exclude. If not specified, does 
@@ -51,3 +51,4 @@ Any of the configuration or repository parameters can be used as replacement
 variables in other parameters. Nested parameters are not supported. Other
 parameters that are available are:
  * repo - The repository name
+ * project - The project name (Bitbucket only)

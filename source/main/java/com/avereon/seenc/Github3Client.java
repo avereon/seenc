@@ -15,16 +15,12 @@ public class Github3Client extends RepoClient {
 
 	private static final Logger log = LoggerFactory.getLogger( Github3Client.class );
 
-	//private RestTemplate rest;
-
 	protected Github3Client( RepoClientConfig config ) {
 		super( config );
-//		rest = new RestTemplate();
-//		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.get( "username" ), config.get( "password" ) ) );
 	}
 
 	@Override
-	public Set<GitRepo> getRepos() {
+	public Set<GitRepo> getRemotes() {
 		Set<GitRepo> repos = new HashSet<>();
 		String login = getGithubUser();
 
@@ -32,15 +28,7 @@ public class Github3Client extends RepoClient {
 			URI uri = getUriTemplate( "/orgs/{org}/repos" ).expand( org );
 			if( org.equals( login ) ) uri = getUriTemplate( "/user/repos" ).expand();
 
-			String host = uri.getHost();
-			String username = Uris.getUsername( uri );
-			if( username == null ) username = getCredentialsStore().getUsername( host );
-			String password = Uris.getPassword( uri );
-			if( password == null ) password = getCredentialsStore().getPassword( host );
-
-			System.err.println( "u=" + username + " p=" + password );
-
-			for( JsonNode json : getRest().getForObject( uri, JsonNode.class ) ) {
+			for( JsonNode json : getRest( uri ).getForObject( uri, JsonNode.class ) ) {
 				if( json.get( "fork" ).asBoolean() ) continue;
 				repos.add( createRepo( json ) );
 			}
@@ -49,9 +37,9 @@ public class Github3Client extends RepoClient {
 		return repos;
 	}
 
-	private String getGithubUser( ) {
+	private String getGithubUser() {
 		URI uri = getUriTemplate( "/user" ).expand();
-		JsonNode user = getRest().getForObject( uri, JsonNode.class );
+		JsonNode user = getRest( uri ).getForObject( uri, JsonNode.class );
 		return user.findValue( "login" ).asText();
 	}
 

@@ -33,8 +33,7 @@ public class CredentialsStore {
 	}
 
 	private String[] getUri( String host ) {
-		System.err.println( "for host=" + host );
-		URI uri = uris.stream().filter( u -> u.getHost().equals( host ) ).findFirst().orElse( null );
+		URI uri = uris.stream().filter( u -> host.endsWith( u.getHost() ) ).findFirst().orElse( null );
 		if( uri == null ) return new String[] {null, null};
 		return uri.getUserInfo().split( ":" );
 	}

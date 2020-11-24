@@ -7,6 +7,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,9 @@ import org.springframework.web.util.UriTemplate;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,38 +34,31 @@ public abstract class RepoClient {
 
 	private RepoClientConfig config;
 
-	private RestTemplate rest;
+	//private RestTemplate rest;
 
 	private CredentialsStore credentialsStore;
 
 	protected RepoClient( RepoClientConfig config ) {
 		this.config = config;
 		this.credentialsStore = new CredentialsStore();
-		rest = new RestTemplate();
-		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.get( "username" ), config.get( "password" ) ) );
 	}
 
-	public abstract Set<GitRepo> getRepos();
+	public abstract Set<GitRepo> getRemotes();
 
 	public void processRepositories() {
 		List<String> include = getConfig().getAll( "include" );
 		List<String> exclude = getConfig().getAll( "exclude" );
 
-		List<GitRepo> repos = new ArrayList<>( getRepos() )
-			.stream()
-			.filter( ( repo ) -> include.size() == 0 || include.contains( repo.getName() ) )
-			.filter( ( repo ) -> !exclude.contains( repo.getName() ) )
-			.sorted()
-			.collect( Collectors.toList() );
+		List<GitRepo> remotes = new ArrayList<>( getRemotes() ).stream().filter( ( repo ) -> include.size() == 0 || include.contains( repo.getName() ) ).filter( ( repo ) -> !exclude.contains( repo.getName() ) ).sorted().collect( Collectors.toList() );
 
-		int[] counts = getCounts( repos );
+		int[] counts = getCounts( remotes );
 		System.out.println( "Cloning " + counts[ 0 ] + " branches from " + counts[ 1 ] + " repositories and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repositories" );
-		processRepos( repos );
+		processRepos( remotes );
 	}
 
-	private int[] getCounts( List<GitRepo> repos ) {
+	private int[] getCounts( List<GitRepo> remotes ) {
 		int[] result = new int[ 4 ];
-		for( GitRepo repo : repos ) {
+		for( GitRepo repo : remotes ) {
 			Path localPath = repo.getLocalPath();
 			boolean exists = Files.exists( localPath );
 			if( exists ) {
@@ -75,7 +72,8 @@ public abstract class RepoClient {
 				}
 			} else {
 				try {
-					Collection<Ref> heads = Git.lsRemoteRepository().setRemote( repo.getRemote() ).setHeads( true ).call();
+					String remote = repo.getRemote();
+					Collection<Ref> heads = Git.lsRemoteRepository().setRemote( remote ).setHeads( true ).setCredentialsProvider( getGitCredentials( remote ) ).call();
 					result[ 0 ] += heads.size();
 					result[ 1 ]++;
 				} catch( Exception exception ) {
@@ -88,45 +86,50 @@ public abstract class RepoClient {
 
 	private void processRepos( List<GitRepo> repos ) {
 		for( GitRepo repo : repos ) {
-			Path localPath = repo.getLocalPath();
-			boolean exists = Files.exists( localPath );
-			if( exists ) {
-				try {
-					Git git = Git.open( localPath.toFile() );
-					String uri = git.getRepository().getConfig().getString( "remote", "origin", "url" );
-					System.err.println( "host=" + URI.create( uri ).getHost() );
-
-					// Get the current branch
-					String currentBranch = git.getRepository().getBranch();
-
-					List<Ref> branches = git.branchList().call();
-					for( Ref branch : branches ) {
-						try {
-							git.checkout().setName( branch.getName() ).call();
-							int result = doGitPull( localPath );
-							printResult( repo, branch, result == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATED );
-						} catch( RefNotAdvertisedException exception ) {
-							if( log.isDebugEnabled() ) printResult( repo, branch, GitResult.MISSING );
-						} catch( Exception exception ) {
-							printResult( repo, branch, GitResult.ERROR, exception );
-						}
-					}
-
-					// Go back to the current branch
-					git.checkout().setName( currentBranch ).call();
-				} catch( RefNotFoundException exception ) {
-					if( log.isDebugEnabled() ) printResult( repo, GitResult.MISSING );
-				} catch( Exception exception ) {
-					printResult( repo, GitResult.ERROR, exception );
-				}
+			if( Files.exists( repo.getLocalPath() ) ) {
+				pullRepo( repo );
 			} else {
+				cloneRepo( repo );
+			}
+		}
+	}
+
+	private void cloneRepo( GitRepo repo ) {
+		try {
+			int result = doGitClone( repo.getLocalPath(), repo.getRemote() );
+			printResult( repo, result == 0 ? GitResult.CLONE_SUCCESS : GitResult.ERROR );
+		} catch( Exception exception ) {
+			printResult( repo, GitResult.ERROR, exception );
+		}
+	}
+
+	private void pullRepo( GitRepo repo ) {
+		try {
+			Path localPath = repo.getLocalPath();
+			Git git = Git.open( localPath.toFile() );
+
+			// Get the current branch
+			String currentBranch = git.getRepository().getBranch();
+
+			List<Ref> branches = git.branchList().call();
+			for( Ref branch : branches ) {
 				try {
-					int result = doGitClone( localPath, repo.getRemote() );
-					printResult( repo, result == 0 ? GitResult.CLONE_SUCCESS : GitResult.ERROR );
+					git.checkout().setName( branch.getName() ).call();
+					int result = doGitPull( localPath );
+					printResult( repo, branch, result == 0 ? GitResult.PULL_UP_TO_DATE : GitResult.PULL_UPDATED );
+				} catch( RefNotAdvertisedException exception ) {
+					if( log.isDebugEnabled() ) printResult( repo, branch, GitResult.MISSING );
 				} catch( Exception exception ) {
-					printResult( repo, GitResult.ERROR, exception );
+					printResult( repo, branch, GitResult.ERROR, exception );
 				}
 			}
+
+			// Go back to the current branch
+			git.checkout().setName( currentBranch ).call();
+		} catch( RefNotFoundException exception ) {
+			if( log.isDebugEnabled() ) printResult( repo, GitResult.MISSING );
+		} catch( Exception exception ) {
+			printResult( repo, GitResult.ERROR, exception );
 		}
 	}
 
@@ -154,25 +157,31 @@ public abstract class RepoClient {
 		}
 	}
 
-	public int doGitPull( Path repo ) throws IOException, GitAPIException {
-		PullResult result = Git
-			.open( repo.toFile() )
-			.pull()
-			.setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.get( "username" ), config.get( "password" ) ) )
-			.call();
+	public int doGitPull( Path repo ) throws IOException, GitAPIException, URISyntaxException {
+		Git git = Git.open( repo.toFile() );
+		String uri = git.getRepository().getConfig().getString( "remote", "origin", "url" );
+
+		PullResult result = git.pull().setCredentialsProvider( getGitCredentials( uri ) ).call();
 		MergeResult.MergeStatus status = result.getMergeResult().getMergeStatus();
 		return status == MergeResult.MergeStatus.ALREADY_UP_TO_DATE ? 0 : 1;
 	}
 
-	public int doGitClone( Path repo, String uri ) throws IOException, GitAPIException {
+	public int doGitClone( Path repo, String uri ) throws IOException, GitAPIException, URISyntaxException {
+		URI base = new URI( uri );
+		String username = getUsername( base );
+		URI fullUri = new URI( base.getScheme(), URLEncoder.encode( username, StandardCharsets.UTF_8 ), base.getHost(), base.getPort(),base.getPath(), base.getQuery(), base.getFragment() );
+
 		Files.createDirectories( repo );
-		Git
-			.cloneRepository()
-			.setURI( uri )
-			.setDirectory( repo.toFile() )
-			.setCredentialsProvider( new UsernamePasswordCredentialsProvider( config.get( "username" ), config.get( "password" ) ) )
-			.call();
+		Git.cloneRepository().setURI( fullUri.toASCIIString() ).setDirectory( repo.toFile() ).setCredentialsProvider( getGitCredentials( base ) ).call();
 		return 0;
+	}
+
+	private CredentialsProvider getGitCredentials( String uri ) throws URISyntaxException {
+		return getGitCredentials( new URI( uri ) );
+	}
+
+	private CredentialsProvider getGitCredentials( URI uri ) {
+		return new UsernamePasswordCredentialsProvider( getUsername( uri ), getPassword( uri ) );
 	}
 
 	protected RepoClientConfig getConfig() {
@@ -183,7 +192,9 @@ public abstract class RepoClient {
 		return credentialsStore;
 	}
 
-	protected RestTemplate getRest() {
+	protected RestTemplate getRest( URI uri ) {
+		RestTemplate rest = new RestTemplate();
+		rest.getInterceptors().add( new BasicAuthorizationInterceptor( getUsername( uri ), getPassword( uri ) ) );
 		return rest;
 	}
 
@@ -192,6 +203,22 @@ public abstract class RepoClient {
 		if( getConfig().exists( "uri" ) ) endpoint = getConfig().get( "uri" );
 		if( endpoint == null ) endpoint = getConfig().get( getConfig().get( "type" ) + "-default-uri" );
 		return new UriTemplate( endpoint + path );
+	}
+
+	private String getUsername( URI uri ) {
+		String username = null;
+		if( username == null ) username = getConfig().get( "username" );
+		if( username == null ) username = Uris.getUsername( uri );
+		if( username == null ) username = getCredentialsStore().getUsername( uri.getHost() );
+		return username;
+	}
+
+	private String getPassword( URI uri ) {
+		String password = null;
+		if( password == null ) password = getConfig().get( "password" );
+		if( password == null ) password = Uris.getPassword( uri );
+		if( password == null ) password = getCredentialsStore().getPassword( uri.getHost() );
+		return password;
 	}
 
 }

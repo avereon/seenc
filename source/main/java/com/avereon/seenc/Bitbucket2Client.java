@@ -21,7 +21,7 @@ public class Bitbucket2Client extends Bitbucket0Client {
 		super( config );
 	}
 
-	public Set<GitRepo> getRepos() {
+	public Set<GitRepo> getRemotes() {
 		Set<GitRepo> repos = new HashSet<>();
 
 		// The project can be null, and usually is with BB2 repos
@@ -29,12 +29,12 @@ public class Bitbucket2Client extends Bitbucket0Client {
 
 		// Can be used to override the repo project name
 		for( String team : getConfig().getAll( "teams" ) ) {
-			URI nextUri = getUriTemplate( "/repositories/{team}" ).expand( team );
+			URI uri = getUriTemplate( "/repositories/{team}" ).expand( team );
 
 			// Run through all the pages to get the repository parameters.
-			while( nextUri != null ) {
+			while( uri != null ) {
 				// Call Bitbucket for data
-				ObjectNode node = getRest().getForObject( nextUri, ObjectNode.class );
+				ObjectNode node = getRest( uri ).getForObject( uri, ObjectNode.class );
 
 				// Parse and add the repos
 				repos.addAll( parseBitbucketRepos( project, node ) );
@@ -42,7 +42,7 @@ public class Bitbucket2Client extends Bitbucket0Client {
 				// Get the next page
 				try {
 					JsonNode nextNode = node.get( "next" );
-					nextUri = nextNode == null ? null : new URI( nextNode.asText() );
+					uri = nextNode == null ? null : new URI( nextNode.asText() );
 				} catch( URISyntaxException exception ) {
 					log.error( "Error parsing next URI", exception );
 				}

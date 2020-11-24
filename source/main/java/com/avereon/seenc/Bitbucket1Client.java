@@ -16,16 +16,16 @@ public class Bitbucket1Client extends Bitbucket0Client {
 	}
 
 	@Override
-	public Set<GitRepo> getRepos() {
+	public Set<GitRepo> getRemotes() {
 		Set<GitRepo> repos = new HashSet<>();
 
 		List<String> projects = getConfig().getAll( "projects" );
 
 		for( String project : projects ) {
-			Map<String,String> variables = new HashMap<>( getConfig().getMap() );
+			Map<String, String> variables = new HashMap<>( getConfig().getMap() );
 			variables.put( "project", project );
 			URI uri = getUriTemplate( "/projects/{project}/repos?limit=999" ).expand( variables );
-			ObjectNode node = getRest().getForObject( uri, ObjectNode.class );
+			ObjectNode node = getRest( uri ).getForObject( uri, ObjectNode.class );
 			repos.addAll( parseBitbucketRepos( project, node ) );
 		}
 

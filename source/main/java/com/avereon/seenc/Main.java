@@ -1,13 +1,13 @@
 package com.avereon.seenc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * The main class.
@@ -46,28 +46,49 @@ public class Main {
 			return;
 		}
 
-		// Load the default configuration
-		Map<String, String> properties = new HashMap<>( loadPropertiesFromResource() );
+		//		// Load the default configuration
+		//		Map<String, String> properties = new HashMap<>( loadPropertiesFromResource() );
+		//
+		//		// Process the command line parameters
+		//		try {
+		//			CommandLine cli = new DefaultParser().parse( getOptions(), commands, false );
+		//			// Load config from file
+		//			properties.putAll( loadPropertiesFromConfig( cli.getOptionValue( "config" ) ) );
+		//			// Load properties from command line
+		//			properties.putAll( loadPropertiesFromCli( cli ) );
+		//		} catch( ParseException exception ) {
+		//			log.error( "Unable to parse command line parameters", exception );
+		//		}
+		//
+		//		// Determine repository client
+		//		RepoClient client = RepoClientFactory.getRepoClient( new RepoClientConfig( properties ) );
+		//		if( client == null ) {
+		//			log.error( "Unable to configure client" );
+		//			return;
+		//		}
+		//
+		//		client.processRepositories();
 
-		// Process the command line parameters
+
 		try {
 			CommandLine cli = new DefaultParser().parse( getOptions(), commands, false );
-			// Load config from file
-			properties.putAll( loadPropertiesFromConfig( cli.getOptionValue( "config" ) ) );
-			// Load properties from command line
-			properties.putAll( loadPropertiesFromCli( cli ) );
+			List<Map<String, String>> configs = loadConfigs( cli.getOptionValue( "config" ) );
+			//System.out.println( "Config count=" + configs.size() );
+			System.out.println( "Initializing..." );
+			Map<String, String> defaults = new HashMap<>( loadPropertiesFromResource() );
+			for( Map<String, String> config : configs ) {
+				config.putAll( defaults );
+				RepoClient client = RepoClientFactory.getRepoClient( new RepoClientConfig( config ) );
+				if( client != null ) {
+					client.processRepositories();
+				} else {
+					log.error( "Unable to configure client" );
+				}
+			}
 		} catch( ParseException exception ) {
 			log.error( "Unable to parse command line parameters", exception );
 		}
 
-		// Determine repository client
-		RepoClient client = RepoClientFactory.getRepoClient( new RepoClientConfig( properties ) );
-		if( client == null ) {
-			log.error( "Unable to determine client type" );
-			return;
-		}
-
-		client.processRepositories();
 	}
 
 	protected Options getOptions() {
@@ -85,6 +106,21 @@ public class Main {
 		//options.addOption( Option.builder().longOpt( "git-protocol" ).numberOfArgs( 1 ).argName( "protocol" ).build() );
 
 		return options;
+	}
+
+	@SuppressWarnings( "unchecked" )
+	private List<Map<String, String>> loadConfigs( String config ) {
+		List<Map<String, String>> configs = new ArrayList<>();
+
+		try( FileInputStream input = new FileInputStream( new File( config ) ) ) {
+			configs = new ObjectMapper().readValue( input, configs.getClass() );
+		} catch( FileNotFoundException exception ) {
+			throw new RuntimeException( "Missing config file: " + config, exception );
+		} catch( IOException exception ) {
+			log.error( "Unable to load config file: " + config, exception );
+		}
+
+		return configs;
 	}
 
 	private Map<String, String> loadPropertiesFromResource() {
@@ -134,23 +170,23 @@ public class Main {
 		return properties;
 	}
 
-//	private BitbucketConfig configure( Map<String, String> properties ) {
-//		BitbucketConfig config = new BitbucketConfig();
-//
-//		config.setRepoUri( properties.get( "bitbucket-rest-repo-uri" ) );
-//		config.setTeam( properties.get( "bitbucket-team" ) );
-//		config.setUsername( properties.get( "bitbucket-username" ) );
-//		config.setPassword( properties.get( "bitbucket-password" ) );
-//		config.setTarget( properties.get( "target" ) );
-//
-//		return config;
-//	}
+	//	private BitbucketConfig configure( Map<String, String> properties ) {
+	//		BitbucketConfig config = new BitbucketConfig();
+	//
+	//		config.setRepoUri( properties.get( "bitbucket-rest-repo-uri" ) );
+	//		config.setTeam( properties.get( "bitbucket-team" ) );
+	//		config.setUsername( properties.get( "bitbucket-username" ) );
+	//		config.setPassword( properties.get( "bitbucket-password" ) );
+	//		config.setTarget( properties.get( "target" ) );
+	//
+	//		return config;
+	//	}
 
 	private void describe() {
 		try {
 			InputStream input = getClass().getResourceAsStream( "/META-INF/product.info" );
 			Properties properties = new Properties();
-			properties.load( new InputStreamReader( input, "utf-8" ) );
+			properties.load( new InputStreamReader( input, StandardCharsets.UTF_8 ) );
 			provider = properties.getProperty( "provider" );
 			product = properties.getProperty( "product" );
 			version = properties.getProperty( "version" );

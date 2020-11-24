@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -31,8 +32,11 @@ public abstract class RepoClient {
 
 	private RestTemplate rest;
 
+	private CredentialsStore credentialsStore;
+
 	protected RepoClient( RepoClientConfig config ) {
 		this.config = config;
+		this.credentialsStore = new CredentialsStore();
 		rest = new RestTemplate();
 		rest.getInterceptors().add( new BasicAuthorizationInterceptor( config.get( "username" ), config.get( "password" ) ) );
 	}
@@ -50,7 +54,6 @@ public abstract class RepoClient {
 			.sorted()
 			.collect( Collectors.toList() );
 
-		System.out.println( "Initializing..." );
 		int[] counts = getCounts( repos );
 		System.out.println( "Cloning " + counts[ 0 ] + " branches from " + counts[ 1 ] + " repositories and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repositories" );
 		processRepos( repos );
@@ -90,6 +93,8 @@ public abstract class RepoClient {
 			if( exists ) {
 				try {
 					Git git = Git.open( localPath.toFile() );
+					String uri = git.getRepository().getConfig().getString( "remote", "origin", "url" );
+					System.err.println( "host=" + URI.create( uri ).getHost() );
 
 					// Get the current branch
 					String currentBranch = git.getRepository().getBranch();
@@ -172,6 +177,10 @@ public abstract class RepoClient {
 
 	protected RepoClientConfig getConfig() {
 		return config;
+	}
+
+	protected CredentialsStore getCredentialsStore() {
+		return credentialsStore;
 	}
 
 	protected RestTemplate getRest() {

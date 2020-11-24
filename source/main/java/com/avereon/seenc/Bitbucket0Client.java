@@ -43,7 +43,7 @@ public abstract class Bitbucket0Client extends RepoClient {
 		// Project name override
 		if( !TextUtils.isBlank( project ) ) projectName = project.toLowerCase();
 
-		UriTemplate targetUri = new UriTemplate( getConfig().get( "target" ) );
+		UriTemplate targetUri = new UriTemplate( "file:" + getConfig().get( "target" ) );
 		Path targetPath = Paths.get( targetUri.expand( projectName, repoName ) );
 
 		GitRepo gitRepo = new GitRepo();

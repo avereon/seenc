@@ -2,7 +2,7 @@
   <configuration default="false" name="Seenc AVN GitHub" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.avereon.seenc.Main" />
     <module name="seenc" />
-    <option name="PROGRAM_PARAMETERS" value="-c $PROJECT_DIR$/../../../vault/seenc.properties" />
+    <option name="PROGRAM_PARAMETERS" value="-c $PROJECT_DIR$/../../../vault/seenc.config.json" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.avereon.seenc.*" />

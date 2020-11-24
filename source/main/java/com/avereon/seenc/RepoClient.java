@@ -62,8 +62,7 @@ public abstract class RepoClient {
 			Path localPath = repo.getLocalPath();
 			boolean exists = Files.exists( localPath );
 			if( exists ) {
-				try {
-					Git git = Git.open( localPath.toFile() );
+				try( Git git = Git.open( localPath.toFile() ) ) {
 					List<Ref> branches = git.branchList().call();
 					result[ 2 ] += branches.size();
 					result[ 3 ]++;
@@ -104,10 +103,8 @@ public abstract class RepoClient {
 	}
 
 	private void pullRepo( GitRepo repo ) {
-		try {
-			Path localPath = repo.getLocalPath();
-			Git git = Git.open( localPath.toFile() );
-
+		Path localPath = repo.getLocalPath();
+		try( Git git = Git.open( localPath.toFile() ) ) {
 			// Get the current branch
 			String currentBranch = git.getRepository().getBranch();
 
@@ -158,18 +155,19 @@ public abstract class RepoClient {
 	}
 
 	public int doGitPull( Path repo ) throws IOException, GitAPIException, URISyntaxException {
-		Git git = Git.open( repo.toFile() );
-		String uri = git.getRepository().getConfig().getString( "remote", "origin", "url" );
+		try( Git git = Git.open( repo.toFile() ) ) {
+			String uri = git.getRepository().getConfig().getString( "remote", "origin", "url" );
 
-		PullResult result = git.pull().setCredentialsProvider( getGitCredentials( uri ) ).call();
-		MergeResult.MergeStatus status = result.getMergeResult().getMergeStatus();
-		return status == MergeResult.MergeStatus.ALREADY_UP_TO_DATE ? 0 : 1;
+			PullResult result = git.pull().setCredentialsProvider( getGitCredentials( uri ) ).call();
+			MergeResult.MergeStatus status = result.getMergeResult().getMergeStatus();
+			return status == MergeResult.MergeStatus.ALREADY_UP_TO_DATE ? 0 : 1;
+		}
 	}
 
 	public int doGitClone( Path repo, String uri ) throws IOException, GitAPIException, URISyntaxException {
 		URI base = new URI( uri );
 		String username = getUsername( base );
-		URI fullUri = new URI( base.getScheme(), URLEncoder.encode( username, StandardCharsets.UTF_8 ), base.getHost(), base.getPort(),base.getPath(), base.getQuery(), base.getFragment() );
+		URI fullUri = new URI( base.getScheme(), URLEncoder.encode( username, StandardCharsets.UTF_8 ), base.getHost(), base.getPort(), base.getPath(), base.getQuery(), base.getFragment() );
 
 		Files.createDirectories( repo );
 		Git.cloneRepository().setURI( fullUri.toASCIIString() ).setDirectory( repo.toFile() ).setCredentialsProvider( getGitCredentials( base ) ).call();

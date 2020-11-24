@@ -1,4 +1,4 @@
-name: Avereon Seenc CI
+name: Avereon Seenc Continuous
 
 on: [push, pull_request]
 

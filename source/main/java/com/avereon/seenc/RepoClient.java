@@ -22,7 +22,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +48,13 @@ public abstract class RepoClient {
 		List<String> include = getConfig().getAll( "include" );
 		List<String> exclude = getConfig().getAll( "exclude" );
 
-		List<GitRepo> remotes = new ArrayList<>( getRemotes() ).stream().filter( ( repo ) -> include.size() == 0 || include.contains( repo.getName() ) ).filter( ( repo ) -> !exclude.contains( repo.getName() ) ).sorted().collect( Collectors.toList() );
+		Set<GitRepo> allRemotes = getRemotes();
+		List<GitRepo> remotes = allRemotes.stream().filter( ( repo ) -> include.size() == 0 || include.contains( repo.getName() ) ).filter( ( repo ) -> !exclude.contains( repo.getName() ) ).sorted().collect( Collectors.toList() );
+
+		if( remotes.size() == 0 && allRemotes.size()> 0 ) {
+			System.err.println( "Remotes exist but all were filtered out!" );
+			//allRemotes.forEach( r -> System.err.println( "repo=" + r.getName() ) );
+		}
 
 		int[] counts = getCounts( remotes );
 		System.out.println( "Cloning " + counts[ 0 ] + " branches from " + counts[ 1 ] + " repositories and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repositories" );

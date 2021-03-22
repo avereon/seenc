@@ -49,7 +49,6 @@ public abstract class RepoClient {
 		List<String> exclude = getConfig().getAll( "exclude" );
 
 		Set<GitRepo> allRemotes = getRemotes();
-		System.out.println( allRemotes.size() + " remotes found");
 
 		List<GitRepo> remotes = allRemotes
 			.stream()
@@ -59,12 +58,11 @@ public abstract class RepoClient {
 			.collect( Collectors.toList() );
 
 		if( remotes.size() == 0 && allRemotes.size() > 0 ) {
-			throw new RuntimeException( "Remotes exist but all were filtered out!" );
-			//allRemotes.forEach( r -> System.err.println( "repo=" + r.getName() ) );
+			throw new RuntimeException( allRemotes.size() + " repos exist but all were filtered out!" );
 		}
 
 		int[] counts = getCounts( remotes );
-		System.out.println( "Cloning " + counts[ 0 ] + " branches from " + counts[ 1 ] + " repositories and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repositories" );
+		System.out.println( allRemotes.size() + " repos, cloning " + counts[ 0 ] + " branches in " + counts[ 1 ] + " repos and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repos" );
 		processRepos( remotes );
 		return null;
 	}

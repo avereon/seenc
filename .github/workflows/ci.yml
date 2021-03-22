@@ -18,7 +18,7 @@ jobs:
         AVN_REPO_PASSWORD: ${{ secrets.AVN_REPO_PASSWORD }}
       run: mvn test -B -U -V --settings .github/settings.xml --file pom.xml
     - name: Deploy
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/master' || github.base_ref == 'refs/heads/stable'
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.base_ref == 'refs/heads/main' || github.base_ref == 'refs/heads/stable'
       env:
         AVN_GPG_PASSWORD: ${{ secrets.AVN_GPG_PASSWORD }}
         AVN_KEYSTORE_PASSWORD: ${{ secrets.AVN_KEYSTORE_PASSWORD }}

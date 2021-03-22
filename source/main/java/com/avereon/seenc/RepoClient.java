@@ -44,21 +44,29 @@ public abstract class RepoClient {
 
 	public abstract Set<GitRepo> getRemotes();
 
-	public void processRepositories() {
+	public String processRepositories() {
 		List<String> include = getConfig().getAll( "include" );
 		List<String> exclude = getConfig().getAll( "exclude" );
 
 		Set<GitRepo> allRemotes = getRemotes();
-		List<GitRepo> remotes = allRemotes.stream().filter( ( repo ) -> include.size() == 0 || include.contains( repo.getName() ) ).filter( ( repo ) -> !exclude.contains( repo.getName() ) ).sorted().collect( Collectors.toList() );
+		System.out.println( allRemotes.size() + " remotes found");
 
-		if( remotes.size() == 0 && allRemotes.size()> 0 ) {
-			System.err.println( "Remotes exist but all were filtered out!" );
+		List<GitRepo> remotes = allRemotes
+			.stream()
+			.filter( ( repo ) -> include.size() == 0 || include.contains( repo.getName() ) )
+			.filter( ( repo ) -> !exclude.contains( repo.getName() ) )
+			.sorted()
+			.collect( Collectors.toList() );
+
+		if( remotes.size() == 0 && allRemotes.size() > 0 ) {
+			throw new RuntimeException( "Remotes exist but all were filtered out!" );
 			//allRemotes.forEach( r -> System.err.println( "repo=" + r.getName() ) );
 		}
 
 		int[] counts = getCounts( remotes );
 		System.out.println( "Cloning " + counts[ 0 ] + " branches from " + counts[ 1 ] + " repositories and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repositories" );
 		processRepos( remotes );
+		return null;
 	}
 
 	private int[] getCounts( List<GitRepo> remotes ) {

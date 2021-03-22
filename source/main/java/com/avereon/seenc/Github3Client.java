@@ -25,15 +25,38 @@ public class Github3Client extends RepoClient {
 		String login = getGithubUser();
 
 		for( String org : getConfig().getAll( "orgs" ) ) {
-			URI uri = getUriTemplate( "/orgs/{org}/repos" ).expand( org );
-			if( org.equals( login ) ) uri = getUriTemplate( "/user/repos" ).expand();
-
-			for( JsonNode json : getRest( uri ).getForObject( uri, JsonNode.class ) ) {
-				if( json.get( "fork" ).asBoolean() ) continue;
-				repos.add( createRepo( json ) );
-			}
+			repos.addAll( org.equals( login ) ? collectUserRepos() : collectOrgRepos( org ) );
 		}
 
+		return repos;
+	}
+
+	private Set<GitRepo> collectOrgRepos( String org ) {
+		Set<GitRepo> repos = new HashSet<>();
+
+		int page = 0;
+		int count;
+
+		do {
+			count = 0;
+			URI reposUri = getUriTemplate( "/orgs/{org}/repos?page={page}" ).expand( org, page++ );
+			for( JsonNode json : getRest( reposUri ).getForObject( reposUri, JsonNode.class ) ) {
+				if( json.get( "fork" ).asBoolean() ) continue;
+				repos.add( createRepo( json ) );
+				count++;
+			}
+		} while ( count > 0);
+
+		return repos;
+	}
+
+	private Set<GitRepo> collectUserRepos() {
+		Set<GitRepo> repos = new HashSet<>();
+		URI reposUri = getUriTemplate( "/user/repos" ).expand();
+		for( JsonNode json : getRest( reposUri ).getForObject( reposUri, JsonNode.class ) ) {
+			if( json.get( "fork" ).asBoolean() ) continue;
+			repos.add( createRepo( json ) );
+		}
 		return repos;
 	}
 

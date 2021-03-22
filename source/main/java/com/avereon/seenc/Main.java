@@ -69,7 +69,6 @@ public class Main {
 		//
 		//		client.processRepositories();
 
-
 		try {
 			CommandLine cli = new DefaultParser().parse( getOptions(), commands, false );
 			List<Map<String, String>> configs = loadConfigs( cli.getOptionValue( "config" ) );
@@ -80,7 +79,11 @@ public class Main {
 				config.putAll( defaults );
 				RepoClient client = RepoClientFactory.getRepoClient( new RepoClientConfig( config ) );
 				if( client != null ) {
-					client.processRepositories();
+					try {
+						client.processRepositories();
+					} catch( RuntimeException exception ) {
+						System.err.println( exception.getMessage() );
+					}
 				} else {
 					log.error( "Unable to configure client" );
 				}
@@ -215,8 +218,7 @@ public class Main {
 
 		StringWriter writer = new StringWriter();
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(
-			new PrintWriter( writer ),
+		formatter.printHelp( new PrintWriter( writer ),
 			formatter.getWidth(),
 			"seenc [OPTION]... <repo>",
 			null,

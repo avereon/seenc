@@ -20,11 +20,6 @@ public abstract class Bitbucket0Client extends RepoClient {
 		super( config );
 	}
 
-	public void processRepositories() {
-		System.out.println( "Requesting repositories ..." );
-		super.processRepositories();
-	}
-
 	Set<GitRepo> parseBitbucketRepos( String project, ObjectNode node ) {
 		Set<GitRepo> repos = new HashSet<>();
 

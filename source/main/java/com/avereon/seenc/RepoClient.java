@@ -62,7 +62,8 @@ public abstract class RepoClient {
 		}
 
 		int[] counts = getCounts( remotes );
-		System.out.println( allRemotes.size() + " repos, cloning " + counts[ 0 ] + " branches in " + counts[ 1 ] + " repos and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repos" );
+		int count = counts[1] + counts[3];
+		System.out.println( count + " repos, cloning " + counts[ 0 ] + " branches in " + counts[ 1 ] + " repos and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repos" );
 		processRepos( remotes );
 		return null;
 	}

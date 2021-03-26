@@ -48,6 +48,18 @@ public class GitRepo implements Comparable<GitRepo> {
 	}
 
 	@Override
+	public int hashCode() {
+		return remote.hashCode();
+	}
+
+	@Override
+	public boolean equals( Object object ) {
+		if( !(object instanceof GitRepo)) return false;
+		GitRepo that = (GitRepo)object;
+		return this.remote.equals( that.remote );
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		if( getProject() != null ) builder.append( getProject() ).append( "/" );

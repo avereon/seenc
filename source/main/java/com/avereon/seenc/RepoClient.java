@@ -49,6 +49,8 @@ public abstract class RepoClient {
 		List<String> exclude = getConfig().getAll( "exclude" );
 
 		Set<GitRepo> allRemotes = getRemotes();
+		System.out.println();
+		System.out.println( getConfig().get( "name" ) + " - checking " + allRemotes.size() + " repositories" );
 
 		List<GitRepo> remotes = allRemotes
 			.stream()
@@ -62,8 +64,7 @@ public abstract class RepoClient {
 		}
 
 		int[] counts = getCounts( remotes );
-		int count = counts[1] + counts[3];
-		System.out.println( count + " repos, cloning " + counts[ 0 ] + " branches in " + counts[ 1 ] + " repos and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repos" );
+		System.out.println( "cloning " + counts[ 0 ] + " branches in " + counts[ 1 ] + " repos and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repos" );
 		processRepos( remotes );
 		return null;
 	}

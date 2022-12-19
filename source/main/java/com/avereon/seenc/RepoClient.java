@@ -11,7 +11,7 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.client.support.BasicAuthorizationInterceptor;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
@@ -205,7 +205,7 @@ public abstract class RepoClient {
 
 	protected RestTemplate getRest( URI uri ) {
 		RestTemplate rest = new RestTemplate();
-		rest.getInterceptors().add( new BasicAuthorizationInterceptor( getUsername( uri ), getPassword( uri ) ) );
+		rest.getInterceptors().add( new BasicAuthenticationInterceptor( getUsername( uri ), getPassword( uri ) ) );
 		return rest;
 	}
 

@@ -64,6 +64,8 @@ public class GitRepo implements Comparable<GitRepo> {
 		StringBuilder builder = new StringBuilder();
 		if( getProject() != null ) builder.append( getProject() ).append( "/" );
 		builder.append( getName() );
+		builder.append( " remote=" ).append( remote );
+		builder.append( " target=" ).append( localPath );
 		return builder.toString();
 	}
 

@@ -156,7 +156,7 @@ public abstract class RepoClient {
 	}
 
 	private void printResult( GitRepo repo, Ref branch, GitResult result, Exception exception ) {
-		String message = repo + ": " + repo.getLocalPath().toAbsolutePath();
+		String message = repo.getName() + ": " + repo.getLocalPath().toAbsolutePath();
 		if( branch != null ) message += ":" + branch.getName();
 		if( exception != null ) message += ": " + exception.getMessage();
 

@@ -3,6 +3,7 @@ package com.avereon.seenc;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriTemplate;
 
 import java.net.URI;
@@ -24,9 +25,23 @@ public class Github3Client extends RepoClient {
 		Set<GitRepo> repos = new HashSet<>();
 		String login = getGithubUser();
 
-		for( String org : getConfig().getAll( "orgs" ) ) {
-			repos.addAll( org.equals( login ) ? collectUserRepos() : collectOrgRepos( org ) );
+		// Collect remotes
+		try {
+			getConfig().getAll( "orgs" ).forEach( org -> {
+				repos.addAll( org.equals( login ) ? collectUserRepos() : collectOrgRepos( org ) );
+			} );
+		} catch( HttpClientErrorException.NotFound exception ) {
+			// Intentionally ignore this exception
+			log.debug( exception.getMessage() );
 		}
+
+		// Require includes
+		getConfig().getAll( "orgs" ).forEach( org -> {
+			getConfig().getAll( "include" ).forEach( name -> {
+				String remote = "https://github.com/" + org.toLowerCase() + "/" + name.toLowerCase() + ".git";
+				repos.add( createRepo( name, remote ) );
+			} );
+		} );
 
 		return repos;
 	}
@@ -75,16 +90,25 @@ public class Github3Client extends RepoClient {
 		return user.findValue( "login" ).asText();
 	}
 
-	private GitRepo createRepo( JsonNode repoNode ) {
+	protected GitRepo createRepo( JsonNode repoNode ) {
 		String repoName = repoNode.get( "name" ).asText().toLowerCase();
-		UriTemplate targetUri = new UriTemplate( "file:" + getConfig().get( "target" ) );
-		Path targetPath = Paths.get( targetUri.expand( repoName ) );
+		return createRepo( repoName, repoNode.get( "clone_url" ).asText(), null );
+	}
 
-		GitRepo gitRepo = new GitRepo();
-		gitRepo.setName( repoName );
-		gitRepo.setRemote( repoNode.get( "clone_url" ).asText() );
-		gitRepo.setLocalPath( targetPath );
-		return gitRepo;
+	protected GitRepo createRepo( String name, String remote ) {
+		return createRepo( name, remote, null );
+	}
+
+	protected GitRepo createRepo( String name, String remote, Path target ) {
+		if( target == null ) {
+			UriTemplate targetUri = new UriTemplate( "file:" + getConfig().get( "target" ) );
+			target = Paths.get( targetUri.expand( name ) );
+		}
+		GitRepo repo = new GitRepo();
+		repo.setName( name );
+		repo.setRemote( remote );
+		repo.setLocalPath( target );
+		return repo;
 	}
 
 }

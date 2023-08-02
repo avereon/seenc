@@ -63,10 +63,6 @@ public abstract class RepoClient {
 			throw new RuntimeException( allRemotes.size() + " repos exist but all were filtered out!" );
 		}
 
-		for( GitRepo repo : remotes ) {
-			log.warn( "Remote=" + repo );
-		}
-
 		int[] counts = getCounts( remotes );
 		System.out.println( "cloning " + counts[ 0 ] + " branches in " + counts[ 1 ] + " repos and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repos" );
 		processRepos( remotes );

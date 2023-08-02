@@ -54,13 +54,17 @@ public abstract class RepoClient {
 
 		List<GitRepo> remotes = allRemotes
 			.stream()
-			.filter( ( repo ) -> include.size() == 0 || include.contains( repo.getName() ) )
+			.filter( ( repo ) -> include.isEmpty() || include.contains( repo.getName() ) )
 			.filter( ( repo ) -> !exclude.contains( repo.getName() ) )
 			.sorted()
 			.collect( Collectors.toList() );
 
-		if( remotes.size() == 0 && allRemotes.size() > 0 ) {
+		if( remotes.isEmpty() && !allRemotes.isEmpty() ) {
 			throw new RuntimeException( allRemotes.size() + " repos exist but all were filtered out!" );
+		}
+
+		for( GitRepo repo : remotes ) {
+			log.warn( "Remote=" + repo );
 		}
 
 		int[] counts = getCounts( remotes );

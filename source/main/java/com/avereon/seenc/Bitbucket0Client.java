@@ -2,7 +2,6 @@ package com.avereon.seenc;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriTemplate;
@@ -36,7 +35,7 @@ public abstract class Bitbucket0Client extends RepoClient {
 		String projectName = repoNode.get( "project" ).get( "name" ).asText().toLowerCase();
 
 		// Project name override
-		if( !TextUtils.isBlank( project ) ) projectName = project.toLowerCase();
+		if( !project.isBlank() ) projectName = project.toLowerCase();
 
 		UriTemplate targetUri = new UriTemplate( "file:" + getConfig().get( "target" ) );
 		Path targetPath = Paths.get( targetUri.expand( repoName ) );

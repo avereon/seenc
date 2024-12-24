@@ -13,7 +13,8 @@ public class RepoClientConfig {
 	}
 
 	public boolean exists( String key ) {
-		return !"".equals( get( key ) );
+		String value = get( key );
+		return value != null && !value.isBlank();
 	}
 
 	public String get( String key ) {

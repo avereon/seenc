@@ -71,7 +71,7 @@ public class Main {
 
 		try {
 			CommandLine cli = new DefaultParser().parse( getOptions(), commands, false );
-			List<Map<String, String>> configs = loadConfigs( cli.getOptionValue( "config" ) );
+			List<Map<String, String>> configs = loadConfigs( cli.getOptionValue( "config" ), cli.getOptionValue( "authentication" ) );
 			//System.out.println( "Config count=" + configs.size() );
 			System.out.println( "Initializing..." );
 			Map<String, String> defaults = new HashMap<>( loadPropertiesFromResource() );
@@ -96,9 +96,9 @@ public class Main {
 
 	protected Options getOptions() {
 		Options options = new Options();
+		options.addOption( Option.builder( "a" ).longOpt( "authentication" ).numberOfArgs( 1 ).argName( "file" ).build() );
 		options.addOption( Option.builder( "c" ).longOpt( "config" ).numberOfArgs( 1 ).argName( "file" ).build() );
 
-		//options.addOption( Option.builder().longOpt( "projects" ).numberOfArgs( 1 ).argName( "project list" ).build() );
 		options.addOption( Option.builder().longOpt( "target" ).numberOfArgs( 1 ).argName( "folder" ).build() );
 
 		options.addOption( Option.builder().longOpt( "username" ).numberOfArgs( 1 ).argName( "username" ).build() );
@@ -106,24 +106,50 @@ public class Main {
 		options.addOption( Option.builder().longOpt( "team" ).numberOfArgs( 1 ).argName( "team" ).build() );
 		options.addOption( Option.builder().longOpt( "type" ).numberOfArgs( 1 ).argName( "type" ).build() );
 		options.addOption( Option.builder().longOpt( "uri" ).numberOfArgs( 1 ).argName( "uri" ).build() );
-		//options.addOption( Option.builder().longOpt( "git-protocol" ).numberOfArgs( 1 ).argName( "protocol" ).build() );
 
 		return options;
 	}
 
 	@SuppressWarnings( "unchecked" )
-	private List<Map<String, String>> loadConfigs( String config ) {
-		List<Map<String, String>> configs = new ArrayList<>();
+	private List<Map<String, String>> loadConfigs( String config, String authentication ) {
+		List<Map<String, String>> authList = new ArrayList<>();
+		Map<String, Map<String, String>> authMap = new HashMap<>();
+		List<Map<String, String>> configList = new ArrayList<>();
 
-		try( FileInputStream input = new FileInputStream( new File( config ) ) ) {
-			configs = new ObjectMapper().readValue( input, configs.getClass() );
+		if( authentication != null ) {
+			try( FileInputStream input = new FileInputStream( authentication ) ) {
+				authList = new ObjectMapper().readValue( input, configList.getClass() );
+			} catch( FileNotFoundException exception ) {
+				//throw new RuntimeException( "Missing authentication file: " + config, exception );
+			} catch( IOException exception ) {
+				log.error( "Unable to load authentication file: " + config, exception );
+			}
+			for( Map<String, String> auth : authList ) {
+				String id = auth.get( "id" );
+				if( id == null ) continue;
+				authMap.put( id, auth );
+			}
+		}
+
+		try( FileInputStream input = new FileInputStream( config ) ) {
+			configList = new ObjectMapper().readValue( input, configList.getClass() );
 		} catch( FileNotFoundException exception ) {
 			throw new RuntimeException( "Missing config file: " + config, exception );
 		} catch( IOException exception ) {
 			log.error( "Unable to load config file: " + config, exception );
 		}
 
-		return configs;
+		for( Map<String, String> conf : configList ) {
+			String id = conf.get("id");
+			if( id == null) continue;
+
+			Map<String,String> auth = authMap.get(id);
+			if( auth == null ) continue;
+
+			conf.putAll(auth);
+		}
+
+		return configList;
 	}
 
 	private Map<String, String> loadPropertiesFromResource() {
@@ -230,7 +256,7 @@ public class Main {
 		);
 
 		System.out.println();
-		System.out.println( writer.toString() );
+		System.out.println( writer );
 	}
 
 }

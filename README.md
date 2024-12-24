@@ -1,4 +1,4 @@
-[build-status]: https://github.com/avereon/seenc/workflows/Avereon%20Seenc%20CI/badge.svg "Build status"
+[build-status]: https://github.com/avereon/seenc/actions/workflows/ci.yml/badge.svg "Build status"
 
 # Seenc ![alt text][build-status]
 

@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -31,11 +32,9 @@ public abstract class RepoClient {
 
 	private static final Logger log = LoggerFactory.getLogger( RepoClient.class );
 
-	private RepoClientConfig config;
+	private final RepoClientConfig config;
 
-	//private RestTemplate rest;
-
-	private CredentialsStore credentialsStore;
+	private final CredentialsStore credentialsStore;
 
 	protected RepoClient( RepoClientConfig config ) {
 		this.config = config;
@@ -44,7 +43,7 @@ public abstract class RepoClient {
 
 	public abstract Set<GitRepo> getRemotes();
 
-	public String processRepositories() {
+	public void processRepositories() {
 		List<String> include = getConfig().getAll( "include" );
 		List<String> exclude = getConfig().getAll( "exclude" );
 
@@ -66,7 +65,6 @@ public abstract class RepoClient {
 		int[] counts = getCounts( remotes );
 		System.out.println( "cloning " + counts[ 0 ] + " branches in " + counts[ 1 ] + " repos and updating " + counts[ 2 ] + " branches in " + counts[ 3 ] + " repos" );
 		processRepos( remotes );
-		return null;
 	}
 
 	private int[] getCounts( List<GitRepo> remotes ) {
@@ -108,10 +106,10 @@ public abstract class RepoClient {
 
 	private void cloneRepo( GitRepo repo ) {
 		try {
-			int result = doGitClone( repo.getLocalPath(), repo.getRemote() );
-			printResult( repo, result == 0 ? GitResult.CLONE_SUCCESS : GitResult.ERROR );
+			doGitClone( repo.getLocalPath(), repo.getRemote() );
+			printResult( repo, GitResult.CLONE_SUCCESS );
 		} catch( Exception exception ) {
-			printResult( repo, GitResult.ERROR, exception );
+			printResult( repo, exception );
 		}
 	}
 
@@ -139,7 +137,7 @@ public abstract class RepoClient {
 		} catch( RefNotFoundException exception ) {
 			if( log.isDebugEnabled() ) printResult( repo, GitResult.MISSING );
 		} catch( Exception exception ) {
-			printResult( repo, GitResult.ERROR, exception );
+			printResult( repo, exception );
 		}
 	}
 
@@ -151,20 +149,17 @@ public abstract class RepoClient {
 		printResult( repo, branch, result, null );
 	}
 
-	private void printResult( GitRepo repo, GitResult result, Exception exception ) {
-		printResult( repo, null, result, exception );
+	private void printResult( GitRepo repo, Exception exception ) {
+		printResult( repo, null, GitResult.ERROR, exception );
 	}
 
 	private void printResult( GitRepo repo, Ref branch, GitResult result, Exception exception ) {
 		String message = repo.getName() + ": " + repo.getLocalPath().toAbsolutePath();
 		if( branch != null ) message += ":" + branch.getName();
-		if( exception != null ) message += ": " + exception.getMessage();
+		if( exception != null ) message += ": " + exception.getClass().getSimpleName() + ": " + exception.getMessage();
 
-		if( result == GitResult.ERROR ) {
-			System.err.println( result.getSymbol() + " " + message );
-		} else {
-			System.out.println( result.getSymbol() + " " + message );
-		}
+		PrintStream stream = result == GitResult.ERROR ? System.err : System.out;
+		stream.println( result.getSymbol() + " " + message );
 	}
 
 	public int doGitPull( Path repo ) throws IOException, GitAPIException, URISyntaxException {
@@ -177,14 +172,13 @@ public abstract class RepoClient {
 		}
 	}
 
-	public int doGitClone( Path repo, String uri ) throws IOException, GitAPIException, URISyntaxException {
+	public void doGitClone( Path repo, String uri ) throws IOException, GitAPIException, URISyntaxException {
 		URI base = new URI( uri );
 		String username = getUsername( base );
 		URI fullUri = new URI( base.getScheme(), URLEncoder.encode( username, StandardCharsets.UTF_8 ), base.getHost(), base.getPort(), base.getPath(), base.getQuery(), base.getFragment() );
 
 		Files.createDirectories( repo );
 		Git.cloneRepository().setURI( fullUri.toASCIIString() ).setDirectory( repo.toFile() ).setCredentialsProvider( getGitCredentials( base ) ).call();
-		return 0;
 	}
 
 	private CredentialsProvider getGitCredentials( String uri ) throws URISyntaxException {
@@ -214,6 +208,12 @@ public abstract class RepoClient {
 		if( getConfig().exists( "uri" ) ) endpoint = getConfig().get( "uri" );
 		if( endpoint == null ) endpoint = getConfig().get( getConfig().get( "type" ) + "-default-uri" );
 		return new UriTemplate( endpoint + path );
+	}
+
+	protected String replaceVariables( String source ) {
+		String result = source;
+		result = result.replace( "$HOME", System.getProperty( "user.home" ) );
+		return result;
 	}
 
 	private String getUsername( URI uri ) {

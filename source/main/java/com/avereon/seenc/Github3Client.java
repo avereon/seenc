@@ -92,21 +92,17 @@ public class Github3Client extends RepoClient {
 
 	protected GitRepo createRepo( JsonNode repoNode ) {
 		String repoName = repoNode.get( "name" ).asText();
-		return createRepo( repoName, repoNode.get( "clone_url" ).asText(), null );
+		return createRepo( repoName, repoNode.get( "clone_url" ).asText() );
 	}
 
 	protected GitRepo createRepo( String name, String remote ) {
-		return createRepo( name, remote, null );
-	}
+		String configTarget = replaceVariables( getConfig().get( "target" ) );
+		UriTemplate targetUri = new UriTemplate( "file:" + configTarget );
+		Path target = Paths.get( targetUri.expand( name.toLowerCase() ) );
 
-	protected GitRepo createRepo( String name, String remote, Path target ) {
-		if( target == null ) {
-			UriTemplate targetUri = new UriTemplate( "file:" + getConfig().get( "target" ) );
-			target = Paths.get( targetUri.expand( name.toLowerCase() ) );
-		}
 		GitRepo repo = new GitRepo();
 		repo.setName( name.toLowerCase() );
-		repo.setRemote( remote.toLowerCase() );
+		repo.setRemote( remote );
 		repo.setLocalPath( target );
 		return repo;
 	}

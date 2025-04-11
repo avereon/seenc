@@ -212,7 +212,7 @@ public abstract class RepoClient {
 
 	protected String replaceVariables( String source ) {
 		String result = source;
-		result = result.replace( "$HOME", System.getProperty( "user.home" ) );
+		result = result.replace( "$HOME", "file://" + System.getProperty( "user.home" ) );
 		return result;
 	}
 

@@ -97,7 +97,7 @@ public class Github3Client extends RepoClient {
 
 	protected GitRepo createRepo( String name, String remote ) {
 		String configTarget = replaceVariables( getConfig().get( "target" ) );
-		UriTemplate targetUri = new UriTemplate( "file:" + configTarget );
+		UriTemplate targetUri = new UriTemplate( "file://" + configTarget );
 		Path target = Paths.get( targetUri.expand( name.toLowerCase() ) );
 
 		GitRepo repo = new GitRepo();

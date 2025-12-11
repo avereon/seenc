@@ -15,6 +15,7 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
@@ -47,8 +48,10 @@ public abstract class RepoClient {
 		List<String> include = getConfig().getAll( "include" );
 		List<String> exclude = getConfig().getAll( "exclude" );
 
-		Set<GitRepo> allRemotes = getRemotes();
 		System.out.println();
+		System.out.println( "Connecting to GitHub " + getConfig().get( "name" )  + " as " + getConfig().get( "username" ) );
+
+		Set<GitRepo> allRemotes = getRemotes();
 		System.out.println( getConfig().get( "name" ) + " - checking " + allRemotes.size() + " repositories" );
 
 		List<GitRepo> remotes = allRemotes
@@ -212,7 +215,8 @@ public abstract class RepoClient {
 
 	protected String replaceVariables( String source ) {
 		String result = source;
-		result = result.replace( "$HOME", System.getProperty( "user.home" ) );
+		File home = new File(System.getProperty( "user.home" ));
+		result = result.replace( "$HOME", home.toURI().getPath() );
 		return result;
 	}
 

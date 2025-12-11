@@ -82,7 +82,8 @@ public class Main {
 					try {
 						client.processRepositories();
 					} catch( RuntimeException exception ) {
-						System.err.println( exception.getMessage() );
+						exception.printStackTrace(System.err);
+						//System.err.println( "Unhandled exception: " + exception.getMessage() );
 					}
 				} else {
 					log.error( "Unable to configure client" );

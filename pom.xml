@@ -40,7 +40,7 @@
 		<commons-cli.version>1.11.0</commons-cli.version>
 		<jackson.version>[2.9.10,)</jackson.version>
 		<jgit.version>7.4.0.202509020913-r</jgit.version>
-		<spring.version>7.0.1</spring.version>
+		<spring.version>7.0.2</spring.version>
 	</properties>
 
 	<dependencies>

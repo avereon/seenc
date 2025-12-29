@@ -73,7 +73,8 @@ public abstract class RepoClient {
         int[] result = new int[4];
         for (GitRepo repo : remotes) {
             Path localPath = repo.getLocalPath();
-            boolean exists = Files.exists(localPath);
+            Path config = localPath.resolve(".git").resolve("config");
+            boolean exists = Files.exists(config);
             if (exists) {
                 try (Git git = Git.open(localPath.toFile())) {
                     List<Ref> branches = git.branchList().call();

@@ -80,8 +80,9 @@ public abstract class RepoClient {
                     List<Ref> branches = git.branchList().call();
                     result[2] += branches.size();
                     result[3]++;
-                } catch (Exception exception) {
-                    System.err.println(exception.getMessage());
+                } catch (Exception ignore) {
+                    // Intentionally ignore exception
+                    //System.err.println(exception.getMessage());
                 }
             } else {
                 try {
@@ -89,8 +90,9 @@ public abstract class RepoClient {
                     Collection<Ref> heads = Git.lsRemoteRepository().setRemote(remote).setHeads(true).setCredentialsProvider(getGitCredentials(remote)).call();
                     result[0] += heads.size();
                     result[1]++;
-                } catch (Exception exception) {
-                    System.err.println(exception.getMessage());
+                } catch (Exception ignore) {
+                    // Intentionally ignore exception
+                    //System.err.println(exception.getMessage());
                 }
             }
         }

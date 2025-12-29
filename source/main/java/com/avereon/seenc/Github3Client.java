@@ -10,6 +10,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class Github3Client extends RepoClient {
@@ -55,7 +56,7 @@ public class Github3Client extends RepoClient {
 		do {
 			count = 0;
 			URI reposUri = getUriTemplate( "/orgs/{org}/repos?page={page}" ).expand( org, page++ );
-			for( JsonNode json : getRest( reposUri ).getForObject( reposUri, JsonNode.class ) ) {
+			for( JsonNode json : Objects.requireNonNull(getRest(reposUri).getForObject(reposUri, JsonNode.class))) {
 				//if( json.get( "fork" ).asBoolean() ) continue;
 				repos.add( createRepo( json ) );
 				count++;
@@ -74,7 +75,7 @@ public class Github3Client extends RepoClient {
 		do {
 			count = 0;
 			URI reposUri = getUriTemplate( "/user/repos?page={page}" ).expand( page++ );
-			for( JsonNode json : getRest( reposUri ).getForObject( reposUri, JsonNode.class ) ) {
+			for( JsonNode json : Objects.requireNonNull(getRest(reposUri).getForObject(reposUri, JsonNode.class))) {
 				//if( json.get( "fork" ).asBoolean() ) continue;
 				repos.add( createRepo( json ) );
 				count++;

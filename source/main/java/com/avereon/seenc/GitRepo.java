@@ -1,10 +1,15 @@
 package com.avereon.seenc;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.nio.file.Path;
 
 /**
  * The GitRepo class represents a Git repository.
  */
+@Setter
+@Getter
 public class GitRepo implements Comparable<GitRepo> {
 
 	private String project;
@@ -15,48 +20,15 @@ public class GitRepo implements Comparable<GitRepo> {
 
 	private Path localPath;
 
-	public String getProject() {
-		return project;
-	}
-
-	public void setProject( String project ) {
-		this.project = project;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName( String name ) {
-		this.name = name;
-	}
-
-	public String getRemote() {
-		return remote;
-	}
-
-	public void setRemote( String remote ) {
-		this.remote = remote;
-	}
-
-	public Path getLocalPath() {
-		return localPath;
-	}
-
-	public void setLocalPath( Path localPath ) {
-		this.localPath = localPath;
-	}
-
-	@Override
+    @Override
 	public int hashCode() {
 		return remote.hashCode();
 	}
 
 	@Override
 	public boolean equals( Object object ) {
-		if( !(object instanceof GitRepo)) return false;
-		GitRepo that = (GitRepo)object;
-		return this.remote.equals( that.remote );
+		if( !(object instanceof GitRepo that)) return false;
+        return this.remote.equals( that.remote );
 	}
 
 	@Override
